@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+  background: #EDEDE3;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  max-width: 480px; 
+  display: flex;
+  flex-direction: column;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+ -webkit-box-shadow: 0 0 0 1000px #EDEDE3 inset !important;
+ -webkit-text-fill-color: #000 !important;
+ caret-color: #000 !important;
+ transition: background-color 5000s ease-in-out 0s;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Leaflet map styles */
+.leaflet-container {
+  background: #e8e8e8;
+}
+
+.custom-marker {
+  z-index: 1000;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+  background: #EDEDE3;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  max-width: 480px; 
+  display: flex;
+  flex-direction: column;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+ -webkit-box-shadow: 0 0 0 1000px #EDEDE3 inset !important;
+ -webkit-text-fill-color: #000 !important;
+ caret-color: #000 !important;
+ transition: background-color 5000s ease-in-out 0s;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Leaflet map styles */
+.leaflet-container {
+  background: #e8e8e8;
+}
+
+.custom-marker {
+  z-index: 1000;
+}
