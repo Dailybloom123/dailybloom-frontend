@@ -134,7 +134,7 @@ const robustFetch = async (url, options = {}, retryCount = 0) => {
   }
 };
 
-const API_BASE = 'http://localhost:4000/api';
+const API_BASE = 'https://dailybloom-x82y.onrender.com/api';
 
 // Currency Configuration for Indian Market
 const CURRENCY = 'INR';
