@@ -454,11 +454,12 @@ function App() {
   // Load addresses from backend when user is authenticated
   useEffect(() => {
     const loadAddresses = async () => {
-      if (user && token) {
+      const authToken = localStorage.getItem('token');
+      if (user && authToken) {
         try {
           const response = await fetch(`${API_BASE}/addresses`, {
             headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${authToken}`
             }
           });
           
@@ -473,7 +474,7 @@ function App() {
     };
 
     loadAddresses();
-  }, [user, token]);
+  }, [user]);
   
   // New Address Form State
   const [newAddressForm, setNewAddressForm] = useState({
@@ -790,11 +791,12 @@ function App() {
 
     // Save address to backend
     try {
+      const authToken = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/addresses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${authToken}`
         },
         body: JSON.stringify(newAddress)
       });
@@ -830,14 +832,15 @@ function App() {
       console.error('Failed to save address:', error);
       setError('Failed to save address. Please try again.');
     }
-  }, [newAddressForm, addresses, token]);
+  }, [newAddressForm, addresses]);
 
   const handleDeleteAddress = async (addressId) => {
     try {
+      const authToken = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/addresses/${addressId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${authToken}`
         }
       });
 
