@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import L from 'leaflet';
-import { Package, IndianRupee, Clock, MapPin, Phone, Mail, Calendar, AlertTriangle, CheckCircle, XCircle, ArrowRight, RefreshCw, Plus, User, LogOut, Trash2, Home, Check, ShoppingBag, Search, Sparkles, Archive, RotateCcw, Heart, CreditCard, Banknote, X, MessageCircle, Navigation, Activity, AlertCircle } from 'lucide-react';
+import { Package, IndianRupee, Clock, MapPin, Phone, Mail, Calendar, AlertTriangle, CheckCircle, XCircle, ArrowRight, RefreshCw, Plus, User, LogOut, Trash2, Home, Check, ShoppingBag, Search, Sparkles, Archive, RotateCcw, Heart, CreditCard, Banknote, X, MessageCircle, Navigation, Activity, AlertCircle, Edit2 } from 'lucide-react';
 import analytics from './analytics-light.js';
 
 // Error Boundary Component
@@ -570,6 +570,7 @@ function App() {
   const [wishlist, setWishlist] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetail, setShowOrderDetail] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState(null);
   
   // Live tracking state
   const [showTrackingModal, setShowTrackingModal] = useState(false);
@@ -857,6 +858,98 @@ function App() {
     } catch (error) {
       console.error('Failed to delete address:', error);
       setError('Failed to delete address. Please try again.');
+    }
+  };
+
+  const handleEditAddress = (address) => {
+    setEditingAddressId(address.id);
+    setNewAddressForm({
+      orderingFor: address.ordering_for || 'Myself',
+      recipientName: address.recipient_name || '',
+      recipientPhone: address.recipient_phone || '',
+      addressType: address.address_type || 'Home',
+      customAddressType: address.custom_address_type || '',
+      line1: address.line1 || '',
+      flatHouseNumber: address.flat_house_number || '',
+      streetBuildingSociety: address.street_building_society || '',
+      locality: address.locality || '',
+      pincode: address.pincode || '',
+      landmark: address.landmark || '',
+      latitude: address.latitude || 26.1445,
+      longitude: address.longitude || 91.7362,
+    });
+    setShowAddAddressModal(true);
+  };
+
+  const handleUpdateAddress = async (e) => {
+    e.preventDefault();
+    const autoPincode = getPincodeFromLocality(newAddressForm.locality) || newAddressForm.pincode;
+    const addressTitle = newAddressForm.addressType === 'Other' 
+      ? newAddressForm.customAddressType || 'Other' 
+      : newAddressForm.addressType;
+    
+    const fullLine = `${newAddressForm.flatHouseNumber ? newAddressForm.flatHouseNumber + ', ' : ''}${newAddressForm.streetBuildingSociety ? newAddressForm.streetBuildingSociety + ', ' : ''}${newAddressForm.line1}`;
+
+    const updatedAddress = {
+      title: addressTitle,
+      ordering_for: newAddressForm.orderingFor,
+      recipient_name: newAddressForm.recipientName,
+      recipient_phone: newAddressForm.recipientPhone,
+      address_type: newAddressForm.addressType,
+      custom_address_type: newAddressForm.customAddressType,
+      line1: fullLine,
+      flat_house_number: newAddressForm.flatHouseNumber,
+      street_building_society: newAddressForm.streetBuildingSociety,
+      locality: newAddressForm.locality,
+      city: 'Guwahati',
+      pincode: autoPincode,
+      landmark: newAddressForm.landmark,
+      latitude: newAddressForm.latitude,
+      longitude: newAddressForm.longitude
+    };
+
+    try {
+      const authToken = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/addresses/${editingAddressId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify(updatedAddress)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAddresses(addresses.map(addr => addr.id === editingAddressId ? data.address : addr));
+        setShowAddAddressModal(false);
+        setEditingAddressId(null);
+        setMapLocationSelected(false);
+        
+        setNewAddressForm({
+          orderingFor: 'Myself',
+          recipientName: '',
+          recipientPhone: '',
+          addressType: 'Home',
+          customAddressType: '',
+          line1: '',
+          flatHouseNumber: '',
+          streetBuildingSociety: '',
+          locality: '',
+          pincode: '',
+          landmark: '',
+          latitude: 26.1445,
+          longitude: 91.7362,
+        });
+        setSuccessMsg('Address updated successfully!');
+        playNotificationSound('success');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to update address');
+      }
+    } catch (error) {
+      console.error('Failed to update address:', error);
+      setError('Failed to update address. Please try again.');
     }
   };
 
@@ -1758,13 +1851,22 @@ const handleVerifyOtp = useCallback(async () => {
                     )}
                     <div style={{ fontSize: 13, color: COLORS.inkSoft, marginTop: 4 }}>{addr.line1}, {addr.locality} - {addr.pincode}</div>
                   </div>
-                  <button 
-                    onClick={() => handleDeleteAddress(addr.id)}
-                    style={{ background: 'none', border: 'none', color: COLORS.danger, cursor: 'pointer', padding: 4 }}
-                    title="Delete address"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button 
+                      onClick={() => handleEditAddress(addr)}
+                      style={{ background: 'none', border: 'none', color: COLORS.marigoldDark, cursor: 'pointer', padding: 4 }}
+                      title="Edit address"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteAddress(addr.id)}
+                      style={{ background: 'none', border: 'none', color: COLORS.danger, cursor: 'pointer', padding: 4 }}
+                      title="Delete address"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -2139,10 +2241,10 @@ const handleVerifyOtp = useCallback(async () => {
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleAddAddress} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <form onSubmit={editingAddressId ? handleUpdateAddress : handleAddAddress} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Complete Address Details</h3>
-                    <button type="button" onClick={() => setShowAddAddressModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{editingAddressId ? 'Edit Address' : 'Complete Address Details'}</h3>
+                    <button type="button" onClick={() => { setShowAddAddressModal(false); setEditingAddressId(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
                       <X size={20} />
                     </button>
                   </div>
