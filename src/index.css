@@ -34,6 +34,10 @@ input:-webkit-autofill:active {
   to { transform: rotate(360deg); }
 }
 
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* Leaflet map styles */
 .leaflet-container {
   background: #e8e8e8;
@@ -73,6 +77,10 @@ input:-webkit-autofill:active {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
 /* Leaflet map styles */
