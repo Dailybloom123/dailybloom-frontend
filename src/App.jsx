@@ -134,7 +134,9 @@ const robustFetch = async (url, options = {}, retryCount = 0) => {
   }
 };
 
-const API_BASE = 'https://dailybloom-x82y.onrender.com/api';
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+  ? 'http://localhost:4000/api' 
+  : 'https://dailybloom-x82y.onrender.com/api';
 
 // Currency Configuration for Indian Market
 const CURRENCY = 'INR';
@@ -864,7 +866,9 @@ const handleGoogleLogin = useCallback(() => {
   try {
     // Initialize Google OAuth flow with direct redirect (more reliable)
     const clientId = '54659216683-mpoqi9n9j6sqldeo6opisic3cflkvm1u.apps.googleusercontent.com';
-    const redirectUri = 'http://localhost:5173/'; // Use trailing slash to match Google Cloud Console
+    const redirectUri = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? 'http://localhost:5173/' 
+      : 'https://dailybloom-frontend.onrender.com/';
     const scope = 'email profile';
     
     // Save current URL to return after login
