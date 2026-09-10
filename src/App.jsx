@@ -450,6 +450,30 @@ function App() {
     analytics.initAnalytics();
     analytics.trackPageView('/');
   }, []);
+
+  // Load addresses from backend when user is authenticated
+  useEffect(() => {
+    const loadAddresses = async () => {
+      if (user && token) {
+        try {
+          const response = await fetch(`${API_BASE}/addresses`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            setAddresses(data.addresses || []);
+          }
+        } catch (error) {
+          console.error('Failed to load addresses:', error);
+        }
+      }
+    };
+
+    loadAddresses();
+  }, [user, token]);
   
   // New Address Form State
   const [newAddressForm, setNewAddressForm] = useState({
@@ -736,7 +760,7 @@ function App() {
     } catch (e) {}
   };
 
-  const handleAddAddress = useCallback((e) => {
+  const handleAddAddress = useCallback(async (e) => {
     e.preventDefault();
     const autoPincode = getPincodeFromLocality(newAddressForm.locality) || newAddressForm.pincode;
     const addressTitle = newAddressForm.addressType === 'Other' 
@@ -746,45 +770,90 @@ function App() {
     const fullLine = `${newAddressForm.flatHouseNumber ? newAddressForm.flatHouseNumber + ', ' : ''}${newAddressForm.streetBuildingSociety ? newAddressForm.streetBuildingSociety + ', ' : ''}${newAddressForm.line1}`;
 
     const newAddress = {
-      id: generateUUID(),
       title: addressTitle,
-      orderingFor: newAddressForm.orderingFor,
-      recipientName: newAddressForm.recipientName,
-      recipientPhone: newAddressForm.recipientPhone,
-      addressType: newAddressForm.addressType,
+      ordering_for: newAddressForm.orderingFor,
+      recipient_name: newAddressForm.recipientName,
+      recipient_phone: newAddressForm.recipientPhone,
+      address_type: newAddressForm.addressType,
+      custom_address_type: newAddressForm.customAddressType,
       line1: fullLine,
+      flat_house_number: newAddressForm.flatHouseNumber,
+      street_building_society: newAddressForm.streetBuildingSociety,
       locality: newAddressForm.locality,
       city: 'Guwahati',
       pincode: autoPincode,
       landmark: newAddressForm.landmark,
       latitude: newAddressForm.latitude,
       longitude: newAddressForm.longitude,
-      is_default: addresses.length === 0,
-      status: 'active'
+      is_default: addresses.length === 0
     };
 
-    setAddresses([...addresses, newAddress]);
-    setShowAddAddressModal(false);
-    setMapLocationSelected(false);
-    
-    setNewAddressForm({
-      orderingFor: 'Myself',
-      recipientName: '',
-      recipientPhone: '',
-      addressType: 'Home',
-      customAddressType: '',
-      line1: '',
-      flatHouseNumber: '',
-      streetBuildingSociety: '',
-      locality: '',
-      pincode: '',
-      landmark: '',
-      latitude: 26.1445,
-      longitude: 91.7362,
-    });
-    setSuccessMsg('Address added successfully!');
-    playNotificationSound('success');
-  }, [newAddressForm, addresses]);
+    // Save address to backend
+    try {
+      const response = await fetch(`${API_BASE}/addresses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newAddress)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAddresses([...addresses, data.address]);
+        setShowAddAddressModal(false);
+        setMapLocationSelected(false);
+        
+        setNewAddressForm({
+          orderingFor: 'Myself',
+          recipientName: '',
+          recipientPhone: '',
+          addressType: 'Home',
+          customAddressType: '',
+          line1: '',
+          flatHouseNumber: '',
+          streetBuildingSociety: '',
+          locality: '',
+          pincode: '',
+          landmark: '',
+          latitude: 26.1445,
+          longitude: 91.7362,
+        });
+        setSuccessMsg('Address added successfully!');
+        playNotificationSound('success');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to save address');
+      }
+    } catch (error) {
+      console.error('Failed to save address:', error);
+      setError('Failed to save address. Please try again.');
+    }
+  }, [newAddressForm, addresses, token]);
+
+  const handleDeleteAddress = async (addressId) => {
+    try {
+      const response = await fetch(`${API_BASE}/addresses/${addressId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        setAddresses(addresses.filter(addr => addr.id !== addressId));
+        setSuccessMsg('Address deleted successfully!');
+        playNotificationSound('success');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to delete address');
+      }
+    } catch (error) {
+      console.error('Failed to delete address:', error);
+      setError('Failed to delete address. Please try again.');
+    }
+  };
 
 // Removed handleGuestLogin - Customers must create account to access DailyBloom
 
@@ -954,7 +1023,7 @@ const handleVerifyOtp = useCallback(async () => {
 
     const addressId = selectedAddressId || (addresses[0] && addresses[0].id);
     if (!addressId) {
-      setError('Please add or select a delivery address.');
+      setError('Please add or select a delivery address');
       setIsLoading(false);
       return;
     }
@@ -1001,7 +1070,8 @@ const handleVerifyOtp = useCallback(async () => {
         delivery_slot: '06:00 AM - 08:00 AM',
         items: cartItemsList.map(item => ({
           product_id: item.id,
-          quantity: item.quantity
+          quantity: item.quantity,
+          price: item.price
         }))
       };
 
@@ -1672,17 +1742,17 @@ const handleVerifyOtp = useCallback(async () => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {addresses.filter(addr => addr.status !== 'deleted').map((addr) => (
+              {addresses.map((addr) => (
                 <div key={addr.id} style={{ border: `2px solid ${selectedAddressId === addr.id ? COLORS.marigold : COLORS.line}`, borderRadius: 12, padding: 16, background: selectedAddressId === addr.id ? COLORS.marigoldLight : '#FAFAFA', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: 14, color: COLORS.ink }}>{addr.title}</div>
-                    {addr.orderingFor === 'Someone Else' && (
-                      <div style={{ fontSize: 12, color: COLORS.marigoldDark, fontWeight: 600 }}>Ordering for: {addr.recipientName} ({addr.recipientPhone})</div>
+                    {addr.ordering_for === 'Someone Else' && (
+                      <div style={{ fontSize: 12, color: COLORS.marigoldDark, fontWeight: 600 }}>Ordering for: {addr.recipient_name} ({addr.recipient_phone})</div>
                     )}
                     <div style={{ fontSize: 13, color: COLORS.inkSoft, marginTop: 4 }}>{addr.line1}, {addr.locality} - {addr.pincode}</div>
                   </div>
                   <button 
-                    onClick={() => setAddresses(addresses.map(a => a.id === addr.id ? { ...a, status: 'deleted' } : a))}
+                    onClick={() => handleDeleteAddress(addr.id)}
                     style={{ background: 'none', border: 'none', color: COLORS.danger, cursor: 'pointer', padding: 4 }}
                     title="Delete address"
                   >
@@ -1875,6 +1945,50 @@ const handleVerifyOtp = useCallback(async () => {
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: 24 }}>
             <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink, marginBottom: 16 }}>Checkout</div>
             <form onSubmit={handleCheckoutSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              
+              {/* Address Selection */}
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.ink, marginBottom: 8 }}>Select Delivery Address</div>
+                {addresses.length === 0 ? (
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ color: COLORS.danger, fontSize: 12, marginBottom: 8 }}>No delivery address saved</div>
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('addresses'); setShowAddAddressModal(true); }}
+                      style={{ background: COLORS.marigold, border: 'none', borderRadius: 8, padding: '8px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      Add New Address
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {addresses.map((addr) => (
+                      <div 
+                        key={addr.id}
+                        onClick={() => setSelectedAddressId(addr.id)}
+                        style={{ 
+                          border: `2px solid ${selectedAddressId === addr.id ? COLORS.marigold : COLORS.line}`, 
+                          borderRadius: 8, 
+                          padding: 12, 
+                          background: selectedAddressId === addr.id ? COLORS.marigoldLight : '#FAFAFA',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <div style={{ fontWeight: 700, fontSize: 14, color: COLORS.ink }}>{addr.title}</div>
+                        <div style={{ fontSize: 12, color: COLORS.inkSoft }}>{addr.line1}, {addr.locality} - {addr.pincode}</div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTab('addresses'); setShowAddAddressModal(true); }}
+                      style={{ background: 'none', border: 'none', color: COLORS.marigoldDark, fontSize: 12, fontWeight: 600, cursor: 'pointer', marginTop: 4 }}
+                    >
+                      + Add New Address
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.ink, marginBottom: 8 }}>Cart Items ({cartItemCount})</div>
                 {cartItemsList.map(item => (

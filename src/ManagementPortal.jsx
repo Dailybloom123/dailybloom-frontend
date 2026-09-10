@@ -1503,6 +1503,7 @@ export default function ManagementPortal() {
               )}
             </div>
           )}
+          )}
 
           {/* Feedback Tab */}
           {activeTab === 'feedback' && (
