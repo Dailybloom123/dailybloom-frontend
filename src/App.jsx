@@ -450,6 +450,11 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [orders, setOrders] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [ordersPollingInterval, setOrdersPollingInterval] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationsPollingInterval, setNotificationsPollingInterval] = useState(null);
 
   const [addresses, setAddresses] = useState([]);
   
@@ -1391,13 +1396,98 @@ const handleVerifyOtp = useCallback(async () => {
     setTrackingMilestones([]);
   };
 
+  // Load orders from backend
+  const loadOrders = useCallback(async () => {
+    const authToken = localStorage.getItem('token');
+    if (!authToken || !user) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/orders`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    }
+  }, [user]);
+
+  // Load notifications from backend
+  const loadNotifications = useCallback(async () => {
+    const authToken = localStorage.getItem('token');
+    if (!authToken || !user) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/notifications`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unread_count || 0);
+      }
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    }
+  }, [user]);
+
+  // Mark notification as read
+  const markNotificationAsRead = async (notificationId) => {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) return;
+
+    try {
+      await fetch(`${API_BASE}/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      loadNotifications();
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  // Load orders when user logs in
+  useEffect(() => {
+    if (user) {
+      loadOrders();
+      loadNotifications();
+    }
+  }, [user, loadOrders, loadNotifications]);
+
+  // Poll orders every 30 seconds when on orders tab
+  useEffect(() => {
+    if (activeTab === 'orders' && user) {
+      const interval = setInterval(loadOrders, 30000); // Poll every 30 seconds
+      setOrdersPollingInterval(interval);
+      return () => clearInterval(interval);
+    }
+  }, [activeTab, user, loadOrders]);
+
+  // Poll notifications every 30 seconds
+  useEffect(() => {
+    if (user) {
+      const interval = setInterval(loadNotifications, 30000); // Poll every 30 seconds
+      setNotificationsPollingInterval(interval);
+      return () => clearInterval(interval);
+    }
+  }, [user, loadNotifications]);
+
   useEffect(() => {
     return () => {
       if (trackingInterval) {
         clearInterval(trackingInterval);
       }
+      if (ordersPollingInterval) {
+        clearInterval(ordersPollingInterval);
+      }
+      if (notificationsPollingInterval) {
+        clearInterval(notificationsPollingInterval);
+      }
     };
-  }, [trackingInterval]);
+  }, [trackingInterval, ordersPollingInterval, notificationsPollingInterval]);
 
 // Checkout Form Submission Handler with full Backend & Razorpay Integration
   const handleCheckoutSubmit = useCallback(async (e) => {
@@ -1822,13 +1912,85 @@ const handleVerifyOtp = useCallback(async () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, position: 'relative' }}>
           <h2 style={{ fontFamily: "Fraunces, serif", margin: 0, color: COLORS.ink, cursor: 'pointer' }} onClick={() => { setActiveTab('store'); setSelectedCategory(null); }}>DailyBloom</h2>
           
-          <button 
-            onClick={() => setShowProfileDropdown(prev => !prev)}
-            title="My Account"
-            style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: '10px', cursor: 'pointer', color: COLORS.ink }}
-          >
-            <User size={20} />
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {/* Notification Bell */}
+            <button
+              onClick={() => setShowNotifications(prev => !prev)}
+              title="Notifications"
+              style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: '10px', cursor: 'pointer', color: COLORS.ink, position: 'relative' }}
+            >
+              <MessageCircle size={20} />
+              {unreadCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: -4,
+                  right: -4,
+                  background: COLORS.danger,
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: 18,
+                  height: 18,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Profile Button */}
+            <button 
+              onClick={() => setShowProfileDropdown(prev => !prev)}
+              title="My Account"
+              style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: '10px', cursor: 'pointer', color: COLORS.ink }}
+            >
+              <User size={20} />
+            </button>
+          </div>
+
+          {/* NOTIFICATIONS DROPDOWN */}
+          {showNotifications && (
+            <div 
+              onMouseLeave={() => setShowNotifications(false)}
+              style={{ position: 'absolute', top: '100%', right: 60, marginTop: 8, background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, minWidth: 300, maxHeight: 400, overflowY: 'auto', padding: 8 }}
+            >
+              <div style={{ padding: '8px 12px', borderBottom: `1px solid ${COLORS.line}`, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Notifications</div>
+                {unreadCount > 0 && (
+                  <button onClick={() => notifications.forEach(n => markNotificationAsRead(n.id))} style={{ background: 'none', border: 'none', color: COLORS.marigoldDark, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+                    Mark all read
+                  </button>
+                )}
+              </div>
+
+              {notifications.length === 0 ? (
+                <div style={{ padding: 20, textAlign: 'center', color: COLORS.inkSoft, fontSize: 13 }}>
+                  No notifications
+                </div>
+              ) : (
+                notifications.map(notification => (
+                  <div
+                    key={notification.id}
+                    onClick={() => markNotificationAsRead(notification.id)}
+                    style={{ padding: 12, borderBottom: `1px solid ${COLORS.line}`, cursor: 'pointer', background: notification.read ? 'transparent' : COLORS.bg }}
+                  >
+                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>
+                      {notification.title}
+                    </div>
+                    <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 4 }}>
+                      {notification.message}
+                    </div>
+                    <div style={{ fontSize: 11, color: COLORS.inkSoft }}>
+                      {new Date(notification.created_at).toLocaleString()}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
           
           {/* PROFILE DROPDOWN MENU */}
           {showProfileDropdown && (
