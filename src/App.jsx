@@ -3,7 +3,7 @@ import L from 'leaflet';
 import { Package, IndianRupee, Clock, MapPin, Phone, Mail, Calendar, AlertTriangle, CheckCircle, XCircle, ArrowRight, RefreshCw, Plus, User, LogOut, Trash2, Home, Check, ShoppingBag, Search, Sparkles, Archive, RotateCcw, Heart, CreditCard, Banknote, X, MessageCircle, Navigation, Activity, AlertCircle, Edit2 } from 'lucide-react';
 import analytics from './analytics-light.js';
 
-// Error Boundary Component
+// Enhanced Error Boundary Component with detailed error reporting
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -16,6 +16,22 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
+    
+    // Log error details for debugging
+    const errorDetails = {
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    };
+    
+    // In production, send error to monitoring service
+    if (process.env.NODE_ENV === 'production') {
+      // Here you would send to Sentry, LogRocket, or similar service
+      console.error('Production error:', errorDetails);
+    }
   }
 
   render() {
@@ -46,25 +62,40 @@ class ErrorBoundary extends React.Component {
             <p style={{ color: COLORS.inkSoft, marginBottom: 24 }}>
               We encountered an unexpected error. Please refresh the page or try again later.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              style={{ 
-                background: COLORS.marigold, 
-                color: COLORS.ink, 
-                border: 'none', 
-                borderRadius: 8, 
-                padding: '12px 24px', 
-                fontWeight: 700, 
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                margin: '0 auto'
-              }}
-            >
-              <RefreshCw size={16} />
-              Refresh Page
-            </button>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => window.location.reload()}
+                style={{ 
+                  background: COLORS.marigold, 
+                  color: COLORS.ink, 
+                  border: 'none', 
+                  borderRadius: 8, 
+                  padding: '12px 24px', 
+                  fontWeight: 700, 
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8
+                }}
+              >
+                <RefreshCw size={16} />
+                Refresh Page
+              </button>
+              <button
+                onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}
+                style={{ 
+                  background: 'transparent', 
+                  color: COLORS.ink, 
+                  border: `1px solid ${COLORS.line}`, 
+                  borderRadius: 8, 
+                  padding: '12px 24px', 
+                  fontWeight: 700, 
+                  cursor: 'pointer'
+                }}
+              >
+                Try Again
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -154,17 +185,21 @@ const formatCurrency = (amount) => {
 };
 
 const COLORS = {
-  bg: '#F8F9F5',
-  ink: '#1A2E23',
-  inkSoft: '#4A5D52',
-  marigold: '#F0B429',
-  marigoldDark: '#D4941A',
-  marigoldLight: '#FDE8C8',
-  card: '#FFFFFF',
-  line: '#E8EFE8',
+  bg: '#FFF8E7', // Very light butter/fresh cow milk cream color
+  ink: '#000000', // Black for font color
+  inkSoft: '#333333', // Dark gray for secondary text
+  marigold: '#FFA500', // Marigold color for boxes/fields
+  marigoldDark: '#E69500', // Darker marigold for hover states
+  marigoldLight: '#FFF4D6', // Light marigold for backgrounds
+  card: '#FFFFFF', // White in some areas
+  line: '#E0E0E0', // Neutral line color
   danger: '#E85D75',
-  dairy: '#5A8A6E',
-  dairyLight: '#E8F0EC',
+  dairy: '#FFF8E7', // Dairy cream theme
+  dairyLight: '#FFF9F0', // Light dairy cream
+  flowers: '#FFE4E1', // Light flowers theme (inspired by Easy Kiya)
+  flowersLight: '#FFF0F0', // Light flowers background
+  bakery: '#FFF5E6', // Bakery theme (inspired by Theobroma)
+  bakeryLight: '#FFF8F0', // Light bakery background
   success: '#4CAF50',
   warning: '#FF9800',
   info: '#2196F3',
@@ -181,13 +216,19 @@ const STATUS_LABELS = {
   rejected: 'Rejected',
 };
 
-// FOUR MAIN CATEGORIES
+// FOUR MAIN CATEGORIES with theme colors
 const CATEGORIES = [
-  { id: 'cat_dairy', name: 'Dairy', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80', desc: 'Farm-fresh milk, curd, ghee & cream from rural farms' },
-  { id: 'cat_bakery', name: 'Bakery', image: 'https://images.unsplash.com/photo-1768672522683-7962c0028c03?auto=format&fit=crop&w=400&q=80', desc: 'Fresh daily breads & baked goods' },
-  { id: 'cat_honey', name: 'Organic Essentials', image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d30?auto=format&fit=crop&w=400&q=80', desc: 'Pure organic honey & traditional jaggery' },
-  { id: 'cat_flowers', name: 'Fresh Flowers', image: 'https://images.unsplash.com/photo-1772559108641-0f5af229282d?auto=format&fit=crop&w=400&q=80', desc: 'Fresh puja flowers for morning aarti & rituals' },
+  { id: 'cat_dairy', name: 'Dairy', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80', desc: 'Farm-fresh milk, curd, ghee & cream from rural farms', theme: COLORS.dairy, themeLight: COLORS.dairyLight },
+  { id: 'cat_bakery', name: 'Bakery', image: 'https://images.unsplash.com/photo-1768672522683-7962c0028c03?auto=format&fit=crop&w=400&q=80', desc: 'Fresh daily breads & baked goods', theme: COLORS.bakery, themeLight: COLORS.bakeryLight },
+  { id: 'cat_honey', name: 'Organic Essentials', image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d30?auto=format&fit=crop&w=400&q=80', desc: 'Pure organic honey & traditional jaggery', theme: COLORS.dairy, themeLight: COLORS.dairyLight },
+  { id: 'cat_flowers', name: 'Fresh Flowers', image: 'https://images.unsplash.com/photo-1772559108641-0f5af229282d?auto=format&fit=crop&w=400&q=80', desc: 'Fresh puja flowers for morning aarti & rituals', theme: COLORS.flowers, themeLight: COLORS.flowersLight },
 ];
+
+// Get category theme colors
+const getCategoryTheme = (categoryId) => {
+  const category = CATEGORIES.find(cat => cat.id === categoryId);
+  return category ? { theme: category.theme, themeLight: category.themeLight } : { theme: COLORS.bg, themeLight: COLORS.card };
+};
 
 const GUWAHATI_PINCODES = {
   '781001': ['pan bazar', 'fancy bazar', 'ambari', 'athgaon', 'uzan bazar', 'latasil', 'machkuwa'],
@@ -405,8 +446,10 @@ function App() {
   const [authView, setAuthView] = useState('landing');
   const [activeTab, setActiveTab] = useState('store');
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [currentTheme, setCurrentTheme] = useState({ theme: COLORS.bg, themeLight: COLORS.card });
   const [searchQuery, setSearchQuery] = useState('');
   const [orders, setOrders] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
 
   const [addresses, setAddresses] = useState([]);
   
@@ -417,6 +460,16 @@ function App() {
 
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
+
+  // Update theme based on selected category
+  useEffect(() => {
+    if (selectedCategory) {
+      const theme = getCategoryTheme(selectedCategory);
+      setCurrentTheme(theme);
+    } else {
+      setCurrentTheme({ theme: COLORS.bg, themeLight: COLORS.card });
+    }
+  }, [selectedCategory]);
 
   // Memoized filtered products to avoid unnecessary recalculations
   const filteredProducts = useMemo(() => {
@@ -450,6 +503,11 @@ function App() {
   // Initialize analytics on mount
   useEffect(() => {
     analytics.initAnalytics();
+    
+    // Pre-load Razorpay script for faster checkout
+    loadRazorpayScript().catch(() => {
+      console.warn('Failed to pre-load Razorpay script');
+    });
     analytics.trackPageView('/');
   }, []);
 
@@ -476,6 +534,31 @@ function App() {
     };
 
     loadAddresses();
+  }, [user]);
+
+  // Load subscriptions from backend when user is authenticated
+  useEffect(() => {
+    const loadSubscriptions = async () => {
+      const authToken = localStorage.getItem('token');
+      if (user && authToken) {
+        try {
+          const response = await fetch(`${API_BASE}/subscriptions`, {
+            headers: {
+              'Authorization': `Bearer ${authToken}`
+            }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setSubscriptions(data || []);
+          }
+        } catch (error) {
+          console.error('Failed to load subscriptions:', error);
+        }
+      }
+    };
+
+    loadSubscriptions();
   }, [user]);
   
   // New Address Form State
@@ -512,10 +595,10 @@ function App() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cards');
 
   // Subscription State
-  const [subscriptions, setSubscriptions] = useState([]);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [selectedProductForSubscription, setSelectedProductForSubscription] = useState(null);
-  const [subscriptionType, setSubscriptionType] = useState('daily'); // daily, weekly, monthly
+  const [subscriptionType, setSubscriptionType] = useState('daily'); // daily, alternate_days, custom_days
+  const [customDays, setCustomDays] = useState([]); // For custom_days: ['Monday', 'Wednesday', 'Friday']
 
   // Feedback/Complaint State
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -543,17 +626,48 @@ function App() {
 
     let message = `🌸 *New Order - DailyBloom*\n\n`;
     message += `*Items:*\n`;
-    
+
     cartItemsList.forEach((item, index) => {
       message += `${index + 1}. ${item.name} x${item.quantity} - ₹${item.price * item.quantity}\n`;
     });
-    
+
     message += `\n*Total: ₹${cartTotal}*\n`;
     message += `*Delivery Charge: ₹${deliveryCharge}*\n`;
     message += `*Final Total: ₹${finalTotal}*\n`;
     message += `Please confirm my order and provide delivery details.`;
-    
+
     return message;
+  };
+
+  const handleWhatsAppOrderSubmit = () => {
+    if (!selectedProductForWhatsApp || !whatsappSlot) return;
+
+    const product = selectedProductForWhatsApp;
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const defaultAddress = addresses[0] || {};
+
+    let message = `🌸 *DailyBloom - New Order Request*\n\n`;
+    message += `*Customer Name:* ${user.name || 'Customer'}\n`;
+    message += `*Delivery Address:* ${defaultAddress.flat_house_no || ''}, ${defaultAddress.landmark || ''}, ${defaultAddress.locality || ''}\n`;
+    message += `*Delivery Locality:* ${defaultAddress.locality || ''}\n\n`;
+    message += `*Items Ordered:*\n`;
+    message += `• ${product.name} × 1 (${formatCurrency(product.price)})\n\n`;
+
+    const slotLabels = {
+      'morning_630_830': 'Morning 6:30–8:30 AM',
+      'mid_morning_1000_1300': 'Mid-Morning Bakery 10:00 AM–1:00 PM',
+      'evening_600_830': 'Evening 6:00–8:30 PM'
+    };
+    message += `*Preferred Slot:* ${slotLabels[whatsappSlot] || whatsappSlot}\n`;
+    message += `*Order Type:* One-Time Drop\n`;
+    message += `*Order Subtotal:* ${formatCurrency(product.price)}\n`;
+
+    const whatsappUrl = `https://wa.me/${WHATSAPP_BUSINESS_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+
+    setShowWhatsAppModal(false);
+    setSelectedProductForWhatsApp(null);
+    setWhatsappSlot('');
   };
 
   const [mapPinLocation, setMapPinLocation] = useState({ lat: 26.1445, lng: 91.7362 });
@@ -566,6 +680,7 @@ function App() {
   // My Account Details Form & Edit Mode State
   const [profileForm, setProfileForm] = useState({ name: '', phone: '', email: '' });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
 
   const [wishlist, setWishlist] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -604,22 +719,23 @@ function App() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code: googleCode })
           });
-          
+
           const data = await res.json();
           console.log('Google auth response:', data);
-          
+
           if (res.ok) {
             localStorage.setItem('token', data.token);
             setUser(data.user || { id: 1, name: 'Google User', email: 'google@dailybloom.com' });
             setAuthView('main');
             console.log('Google login successful:', data.user);
+            setSuccessMsg('Successfully logged in with Google!');
           } else {
             console.error('Google auth error:', data.error);
-            setError(data.error || 'Google login failed');
+            setError(data.error || 'Google login failed. Please try again.');
           }
         } catch (e) {
           console.error('Google callback error:', e);
-          setError('Google authentication failed');
+          setError('Google authentication failed. Please check your internet connection and try again.');
         } finally {
           setIsGoogleAuthLoading(false);
         }
@@ -634,6 +750,173 @@ function App() {
   ]);
   const [complaintText, setComplaintText] = useState('');
   const [showComplaintModal, setShowComplaintModal] = useState(false);
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const [selectedProductForWhatsApp, setSelectedProductForWhatsApp] = useState(null);
+  const [whatsappSlot, setWhatsAppSlot] = useState('');
+
+  // Partners Directory State
+  const [showPartnersDirectory, setShowPartnersDirectory] = useState(false);
+  const [partners, setPartners] = useState([]);
+  const [selectedPartner, setSelectedPartner] = useState(null);
+
+  // Wallet State
+  const [walletBalance, setWalletBalance] = useState(0);
+
+  // Subscription Pause State
+  const [showPauseModal, setShowPauseModal] = useState(false);
+  const [selectedSubscriptionForPause, setSelectedSubscriptionForPause] = useState(null);
+  const [pauseStartDate, setPauseStartDate] = useState('');
+  const [pauseEndDate, setPauseEndDate] = useState('');
+
+  // Withdrawal State
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [bankAccountName, setBankAccountName] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [bankIfscCode, setBankIfscCode] = useState('');
+  const [bankName, setBankName] = useState('');
+
+  // Handle subscription pause
+  const handleCreatePause = async () => {
+    if (!selectedSubscriptionForPause || !pauseStartDate || !pauseEndDate) {
+      setError('Please select start and end dates');
+      return;
+    }
+
+    try {
+      const authToken = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/subscription-pauses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          subscriptionId: selectedSubscriptionForPause.id,
+          startDate: pauseStartDate,
+          endDate: pauseEndDate
+        })
+      });
+
+      if (response.ok) {
+        setSuccessMsg('Pause period created successfully');
+        setShowPauseModal(false);
+        setSelectedSubscriptionForPause(null);
+        setPauseStartDate('');
+        setPauseEndDate('');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to create pause period');
+      }
+    } catch (error) {
+      console.error('Failed to create pause:', error);
+      setError('Failed to create pause period. Please try again.');
+    }
+  };
+
+  // Handle wallet withdrawal
+  const handleWithdrawal = async () => {
+    if (!withdrawalAmount || !bankAccountName || !bankAccountNumber || !bankIfscCode) {
+      setError('Please fill all required fields');
+      return;
+    }
+
+    const amount = parseFloat(withdrawalAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setError('Please enter a valid amount');
+      return;
+    }
+
+    if (amount > walletBalance) {
+      setError('Insufficient wallet balance');
+      return;
+    }
+
+    try {
+      const authToken = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/withdrawals`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          amount: withdrawalAmount,
+          bank_account_name: bankAccountName,
+          bank_account_number: bankAccountNumber,
+          bank_ifsc_code: bankIfscCode,
+          bank_name: bankName
+        })
+      });
+
+      if (response.ok) {
+        setSuccessMsg('Withdrawal request submitted successfully');
+        setShowWithdrawalModal(false);
+        setWithdrawalAmount('');
+        setBankAccountName('');
+        setBankAccountNumber('');
+        setBankIfscCode('');
+        setBankName('');
+        // Reload wallet balance
+        const balanceResponse = await fetch(`${API_BASE}/wallet/balance`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (balanceResponse.ok) {
+          const data = await balanceResponse.json();
+          setWalletBalance(data.wallet.balance || 0);
+        }
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to submit withdrawal request');
+      }
+    } catch (error) {
+      console.error('Failed to submit withdrawal:', error);
+      setError('Failed to submit withdrawal request. Please try again.');
+    }
+  };
+
+  // Load wallet balance when user is authenticated
+  useEffect(() => {
+    const loadWalletBalance = async () => {
+      const authToken = localStorage.getItem('token');
+      if (user && authToken) {
+        try {
+          const response = await fetch(`${API_BASE}/wallet/balance`, {
+            headers: {
+              'Authorization': `Bearer ${authToken}`
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setWalletBalance(data.wallet.balance || 0);
+          }
+        } catch (error) {
+          console.error('Failed to load wallet balance:', error);
+        }
+      }
+    };
+
+    loadWalletBalance();
+  }, [user]);
+
+  // Load partners when directory opens
+  useEffect(() => {
+    const loadPartners = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/partners-directory`);
+        if (response.ok) {
+          const data = await response.json();
+          setPartners(data.partners || []);
+        }
+      } catch (error) {
+        console.error('Failed to load partners:', error);
+      }
+    };
+
+    if (showPartnersDirectory && partners.length === 0) {
+      loadPartners();
+    }
+  }, [showPartnersDirectory, partners.length]);
 
   const cartItemsList = useMemo(() => {
     return Object.keys(cart).map(id => {
@@ -963,17 +1246,19 @@ const handleGoogleLogin = useCallback(() => {
   try {
     // Initialize Google OAuth flow with direct redirect (more reliable)
     const clientId = '54659216683-mpoqi9n9j6sqldeo6opisic3cflkvm1u.apps.googleusercontent.com';
-    const redirectUri = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-      ? 'http://localhost:5173/' 
-      : 'https://dailybloom-frontend.onrender.com/';
+    const port = window.location.port || '5173';
+    const redirectUri = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? `http://localhost:${port}`
+      : 'https://dailybloom-frontend.onrender.com';
     const scope = 'email profile';
-    
+
     // Save current URL to return after login
     sessionStorage.setItem('returnUrl', window.location.href);
-    
+
     // Direct redirect to Google OAuth
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline`;
-    
+
+    console.log('Redirecting to Google OAuth with:', { clientId, redirectUri, authUrl });
     window.location.href = authUrl;
   } catch (e) {
     console.error('Google login error:', e);
@@ -1132,7 +1417,82 @@ const handleVerifyOtp = useCallback(async () => {
       return;
     }
 
-    // Case 1: Cash on Delivery
+    // Case 1: DailyBloom Wallet Payment
+    if (selectedPaymentMethod === 'wallet') {
+      if (walletBalance < finalTotal) {
+        setError('Insufficient wallet balance. Please add funds or choose another payment method.');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const authToken = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            address_id: addressId,
+            delivery_date: new Date().toISOString().split('T')[0],
+            delivery_slot: 'morning',
+            items: cartItemsList.map(item => ({
+              product_id: item.id,
+              quantity: item.quantity
+            }))
+          })
+        });
+
+        if (response.ok) {
+          const order = await response.json();
+
+          // Debit from wallet
+          const debitResponse = await fetch(`${API_BASE}/wallet/debit`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+              amount: finalTotal,
+              type: 'DEBIT_ORDER',
+              description: `Order #${order.id.slice(-6)}`,
+              reference_order_id: order.id
+            })
+          });
+
+          if (debitResponse.ok) {
+            setOrders(prev => [...prev, order]);
+            setCart({});
+            setWalletBalance(walletBalance - finalTotal);
+            setSuccessMsg('Order Placed Successfully');
+            playNotificationSound('success');
+            setIsLoading(false);
+
+            analytics.trackPurchase(order.id, finalTotal, cartItemsList);
+
+            setTimeout(() => {
+              setActiveTab('orders');
+            }, 500);
+          } else {
+            setError('Payment successful but wallet debit failed. Please contact support.');
+            setIsLoading(false);
+          }
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || 'Failed to create order');
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Wallet payment error:', error);
+        setError('Wallet payment failed. Please try again.');
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Case 2: Cash on Delivery
     if (selectedPaymentMethod === 'cod') {
       const newOrder = {
         id: 'ord_' + Date.now().toString().slice(-4),
@@ -1159,7 +1519,11 @@ const handleVerifyOtp = useCallback(async () => {
     }
 
     // Case 2: Cards / UPI / Wallet via Razorpay
-    const isLoaded = await loadRazorpayScript();
+    // Pre-load Razorpay script with timeout
+    const isLoaded = await Promise.race([
+      loadRazorpayScript(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Razorpay SDK load timeout')), 10000))
+    ]);
     if (!isLoaded) {
       setError('Failed to load Razorpay SDK. Please check your internet connection.');
       setIsLoading(false);
@@ -1224,37 +1588,11 @@ const handleVerifyOtp = useCallback(async () => {
           netbanking: true,
           card: true,
           upi: true,
-          wallet: true,
-          emi: true,
-          paylater: true
+          wallet: true
         },
+        // Simplified config for faster loading
         config: {
           display: {
-            blocks: {
-              utib: {
-                name: 'Pay via UTI',
-                instruments: [
-                  {
-                    method: 'netbanking',
-                    flows: ['online']
-                  }
-                ]
-              },
-              other: {
-                name: 'Other Payment Modes',
-                instruments: [
-                  {
-                    method: 'card',
-                    flows: ['emi']
-                  },
-                  {
-                    method: 'app',
-                    flows: ['qr']
-                  }
-                ]
-              }
-            },
-            sequence: ['block.utib', 'block.other'],
             preferences: {
               payment_default_order: ['card', 'netbanking', 'upi', 'wallet']
             }
@@ -1292,7 +1630,7 @@ const handleVerifyOtp = useCallback(async () => {
             // Add order to orders list
             setOrders(prev => [...prev, verifyData]);
             setCart({});
-            setSuccessMsg(`Payment Successful! ${formatCurrency(finalTotal)} paid via Razorpay. Payment ID: ${razorpayResponse.razorpay_payment_id}`);
+            setSuccessMsg('Order Placed Successfully');
             playNotificationSound('success');
             setIsLoading(false);
             
@@ -1501,6 +1839,15 @@ const handleVerifyOtp = useCallback(async () => {
               
               <div style={{ padding: '8px 12px', borderBottom: `1px solid ${COLORS.line}`, marginBottom: 8 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{user?.name || 'User'}</div>
+                <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 2 }}>
+                  Wallet: <span style={{ fontWeight: 600, color: COLORS.marigoldDark }}>₹{walletBalance.toFixed(2)}</span>
+                  <button
+                    onClick={() => setShowWithdrawalModal(true)}
+                    style={{ background: 'none', border: 'none', color: COLORS.marigoldDark, fontSize: 11, fontWeight: 600, cursor: 'pointer', marginLeft: 8 }}
+                  >
+                    Withdraw
+                  </button>
+                </div>
               </div>
               
               <button onClick={() => { setActiveTab('addresses'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
@@ -1509,6 +1856,14 @@ const handleVerifyOtp = useCallback(async () => {
               
               <button onClick={() => { setActiveTab('orders'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
                 <Package size={16} /> Orders
+              </button>
+
+              <button onClick={() => { setShowPartnersDirectory(true); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                <User size={16} /> Our Partners
+              </button>
+
+              <button onClick={() => { setActiveTab('subscriptions'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                <RefreshCw size={16} /> Subscriptions ({subscriptions.length})
               </button>
               
               <button onClick={() => { setActiveTab('support'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
@@ -1521,17 +1876,26 @@ const handleVerifyOtp = useCallback(async () => {
               
               <div style={{ borderTop: `1px solid ${COLORS.line}`, marginTop: 8, marginBottom: 8 }}></div>
               
-              <button onClick={() => { 
-                setProfileForm({ name: user?.name || '', phone: user?.phone || '', email: user?.email || '' }); 
+              <button onClick={() => {
+                setProfileForm({ name: user?.name || '', phone: user?.phone || '', email: user?.email || '' });
                 setIsEditingProfile(false);
                 setSuccessMsg(null);
                 setError(null);
-                setActiveTab('my-account'); 
-                setShowProfileDropdown(false); 
+                setActiveTab('my-account');
+                setShowProfileDropdown(false);
               }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
                 <User size={16} /> My Account
               </button>
-              
+
+              <button onClick={() => {
+                setActiveTab('change-password');
+                setShowProfileDropdown(false);
+                setError(null);
+                setSuccessMsg(null);
+              }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                <RefreshCw size={16} /> Change Password
+              </button>
+
               <button onClick={handleLogout} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.danger }}>
                 <LogOut size={16} /> Sign Out
               </button>
@@ -1621,7 +1985,21 @@ const handleVerifyOtp = useCallback(async () => {
                         <div style={{ padding: 12 }}>
                           <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink }}>{product.name}</div>
                           <div style={{ fontSize: 11, color: COLORS.inkSoft, marginBottom: 8 }}>{product.unit}</div>
-                          
+
+                          {/* Partner badge */}
+                          {product.partner_id && product.partner_name && (
+                            <div
+                              onClick={() => {
+                                setShowPartnersDirectory(true);
+                                // Would need to scroll to partner slug
+                              }}
+                              style={{ fontSize: 10, color: COLORS.marigoldDark, marginBottom: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                            >
+                              <User size={10} />
+                              Sourced from {product.partner_name} – View Partner Story
+                            </div>
+                          )}
+
                           {/* Product attributes badges */}
                           <div style={{ display: 'flex', gap: 4, marginBottom: 8, flexWrap: 'wrap' }}>
                             {product.subscribable && (
@@ -1657,6 +2035,16 @@ const handleVerifyOtp = useCallback(async () => {
                                   Subscribe
                                 </button>
                               )}
+                              <button 
+                                onClick={() => {
+                                  setSelectedProductForWhatsApp(product);
+                                  setShowWhatsAppModal(true);
+                                }}
+                                style={{ background: '#25D366', border: 'none', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 11, cursor: 'pointer', color: 'white' }}
+                                title="Order via WhatsApp"
+                              >
+                                <MessageCircle size={12} />
+                              </button>
                               {(!orderStatus.available) ? (
                                 <button 
                                   disabled
@@ -1820,6 +2208,103 @@ const handleVerifyOtp = useCallback(async () => {
           </div>
         )}
 
+        {/* CHANGE PASSWORD TAB */}
+        {activeTab === 'change-password' && (
+          <div style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink, marginBottom: 20 }}>
+              Change Password
+            </div>
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const res = await fetch(`${API_BASE}/auth/change-password`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({
+                    currentPassword: passwordForm.current,
+                    newPassword: passwordForm.new
+                  })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                  setSuccessMsg('Password changed successfully!');
+                  setPasswordForm({ current: '', new: '', confirm: '' });
+                } else {
+                  setError(data.error || 'Failed to change password');
+                }
+              } catch (err) {
+                setError('Failed to change password. Please try again.');
+              }
+            }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.inkSoft, display: 'block', marginBottom: 4 }}>Current Password</label>
+                <input
+                  type="password"
+                  required
+                  value={passwordForm.current}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.inkSoft, display: 'block', marginBottom: 4 }}>New Password</label>
+                <input
+                  type="password"
+                  required
+                  value={passwordForm.new}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 700, color: COLORS.inkSoft, display: 'block', marginBottom: 4 }}>Confirm New Password</label>
+                <input
+                  type="password"
+                  required
+                  value={passwordForm.confirm}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13
+                  }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                style={{ background: COLORS.marigold, border: 'none', borderRadius: 8, padding: '12px 24px', fontWeight: 700, cursor: 'pointer', fontSize: 13, color: COLORS.ink }}
+              >
+                Change Password
+              </button>
+            </form>
+          </div>
+        )}
+
         {/* ORDERS TAB */}
         {activeTab === 'orders' && (
           <div>
@@ -1839,6 +2324,61 @@ const handleVerifyOtp = useCallback(async () => {
                     </div>
                     <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 8 }}>{formatDateTime(order.createdAt)} · {order.items?.length || 0} items</div>
                     <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink }}>{formatCurrency(parseFloat(order.total))}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* SUBSCRIPTIONS TAB */}
+        {activeTab === 'subscriptions' && (
+          <div style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: 24 }}>
+            <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink, marginBottom: 20 }}>My Subscriptions</div>
+            {subscriptions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 40 }}>
+                <RefreshCw size={32} color={COLORS.inkSoft} style={{ marginBottom: 12 }} />
+                <div style={{ fontSize: 16, fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>No subscriptions found</div>
+                <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 16 }}>Subscribe to products for regular deliveries</div>
+                <button onClick={() => { setActiveTab('store'); setSelectedCategory(null); }} style={{ background: COLORS.marigold, border: 'none', borderRadius: 8, padding: '10px 20px', fontWeight: 700, cursor: 'pointer' }}>Browse Products</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {subscriptions.map((sub) => (
+                  <div key={sub.id} style={{ background: COLORS.bg, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: COLORS.ink }}>{sub.product_name}</div>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: sub.status === 'active' ? '#E4F0E8' : '#FFF4E6', color: sub.status === 'active' ? COLORS.dairy : COLORS.marigold }}>{sub.status}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                        <Clock size={14} /> {sub.frequency}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Package size={14} /> Quantity: {sub.quantity}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink }}>{formatCurrency(parseFloat(sub.price))} / {sub.unit}</div>
+                    <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={() => {
+                          setSelectedSubscriptionForPause(sub);
+                          setShowPauseModal(true);
+                        }}
+                        style={{ flex: 1, background: '#FFF3E0', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 600, fontSize: 12, cursor: 'pointer', color: COLORS.marigoldDark }}
+                      >
+                        Pause
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Handle cancel (would need API)
+                          setSuccessMsg('Cancel subscription feature coming soon');
+                        }}
+                        style={{ flex: 1, background: '#FDEDE4', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 600, fontSize: 12, cursor: 'pointer', color: COLORS.danger }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -2128,6 +2668,25 @@ const handleVerifyOtp = useCallback(async () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
                   <button
                     type="button"
+                    onClick={() => setSelectedPaymentMethod('wallet')}
+                    style={{
+                      background: selectedPaymentMethod === 'wallet' ? COLORS.marigold : '#fff',
+                      border: `1px solid ${COLORS.line}`,
+                      borderRadius: 8,
+                      padding: 12,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    <IndianRupee size={18} />
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>DailyBloom Wallet</span>
+                    <span style={{ fontSize: 10, color: COLORS.inkSoft }}>Balance: ₹{walletBalance.toFixed(2)}</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setSelectedPaymentMethod('cards')}
                     style={{
                       background: selectedPaymentMethod === 'cards' ? COLORS.marigold : '#fff',
@@ -2142,7 +2701,7 @@ const handleVerifyOtp = useCallback(async () => {
                     }}
                   >
                     <CreditCard size={18} />
-                    <span style={{ fontSize: 12, fontWeight: 600 }}>Cards / UPI / Wallet</span>
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>Cards / UPI</span>
                   </button>
                   <button
                     type="button"
@@ -2601,22 +3160,46 @@ const handleVerifyOtp = useCallback(async () => {
                       <div style={{ fontSize: 11, color: COLORS.inkSoft }}>Delivered every day</div>
                     </div>
                   </label>
-                  
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: 12, border: `1px solid ${subscriptionType === 'weekly' ? COLORS.marigold : COLORS.line}`, borderRadius: 8, background: subscriptionType === 'weekly' ? '#FFF8E1' : 'transparent' }}>
-                    <input type="radio" name="subscriptionType" value="weekly" checked={subscriptionType === 'weekly'} onChange={(e) => setSubscriptionType(e.target.value)} />
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: 12, border: `1px solid ${subscriptionType === 'alternate_days' ? COLORS.marigold : COLORS.line}`, borderRadius: 8, background: subscriptionType === 'alternate_days' ? '#FFF8E1' : 'transparent' }}>
+                    <input type="radio" name="subscriptionType" value="alternate_days" checked={subscriptionType === 'alternate_days'} onChange={(e) => setSubscriptionType(e.target.value)} />
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.ink }}>Weekly</div>
-                      <div style={{ fontSize: 11, color: COLORS.inkSoft }}>Delivered once a week</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.ink }}>Alternate Days</div>
+                      <div style={{ fontSize: 11, color: COLORS.inkSoft }}>Delivered every other day</div>
                     </div>
                   </label>
-                  
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: 12, border: `1px solid ${subscriptionType === 'monthly' ? COLORS.marigold : COLORS.line}`, borderRadius: 8, background: subscriptionType === 'monthly' ? '#FFF8E1' : 'transparent' }}>
-                    <input type="radio" name="subscriptionType" value="monthly" checked={subscriptionType === 'monthly'} onChange={(e) => setSubscriptionType(e.target.value)} />
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: 12, border: `1px solid ${subscriptionType === 'custom_days' ? COLORS.marigold : COLORS.line}`, borderRadius: 8, background: subscriptionType === 'custom_days' ? '#FFF8E1' : 'transparent' }}>
+                    <input type="radio" name="subscriptionType" value="custom_days" checked={subscriptionType === 'custom_days'} onChange={(e) => setSubscriptionType(e.target.value)} />
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.ink }}>Monthly</div>
-                      <div style={{ fontSize: 11, color: COLORS.inkSoft }}>Delivered once a month</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.ink }}>Custom Days</div>
+                      <div style={{ fontSize: 11, color: COLORS.inkSoft }}>Choose specific days</div>
                     </div>
                   </label>
+
+                  {subscriptionType === 'custom_days' && (
+                    <div style={{ marginTop: 8, padding: 12, background: COLORS.bg, borderRadius: 8 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.ink, marginBottom: 8 }}>Select days:</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                          <label key={day} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
+                            <input
+                              type="checkbox"
+                              checked={customDays.includes(day)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setCustomDays([...customDays, day]);
+                                } else {
+                                  setCustomDays(customDays.filter(d => d !== day));
+                                }
+                              }}
+                            />
+                            {day}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ fontSize: 13, color: COLORS.inkSoft, marginTop: 8 }}>
@@ -2630,6 +3213,7 @@ const handleVerifyOtp = useCallback(async () => {
                       setShowSubscriptionModal(false);
                       setSelectedProductForSubscription(null);
                       setSubscriptionType('daily');
+                      setCustomDays([]);
                     }} 
                     style={{ flex: 1, background: 'none', border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: 10, fontWeight: 600, cursor: 'pointer' }}
                   >
@@ -2637,29 +3221,375 @@ const handleVerifyOtp = useCallback(async () => {
                   </button>
                   <button 
                     type="button" 
-                    onClick={() => {
-                      const newSubscription = {
-                        id: `sub_${Date.now()}`,
-                        productId: selectedProductForSubscription.id,
-                        productName: selectedProductForSubscription.name,
-                        productPrice: selectedProductForSubscription.price,
-                        unit: selectedProductForSubscription.unit,
-                        type: subscriptionType,
-                        startDate: new Date().toISOString(),
-                        status: 'active'
-                      };
-                      setSubscriptions(prev => [...prev, newSubscription]);
-                      setShowSubscriptionModal(false);
-                      setSelectedProductForSubscription(null);
-                      setSubscriptionType('daily');
-                      setSuccessMsg(`Successfully subscribed to ${selectedProductForSubscription.name} (${subscriptionType})`);
-                      setTimeout(() => setSuccessMsg(null), 3000);
+                    onClick={async () => {
+                      try {
+                        const authToken = localStorage.getItem('token');
+                        if (!authToken) {
+                          setError('Please login to subscribe');
+                          return;
+                        }
+
+                        // Call backend subscription API
+                        const response = await fetch(`${API_BASE}/subscriptions`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                          },
+                          body: JSON.stringify({
+                            product_id: selectedProductForSubscription.id,
+                            address_id: addresses[0]?.id,
+                            frequency: subscriptionType === 'custom_days' ? JSON.stringify(customDays) : subscriptionType,
+                            quantity: 1
+                          })
+                        });
+
+                        if (response.ok) {
+                          // Reload subscriptions from backend
+                          const subsResponse = await fetch(`${API_BASE}/subscriptions`, {
+                            headers: {
+                              'Authorization': `Bearer ${authToken}`
+                            }
+                          });
+                          if (subsResponse.ok) {
+                            const data = await subsResponse.json();
+                            setSubscriptions(data || []);
+                          }
+
+                          setShowSubscriptionModal(false);
+                          setSelectedProductForSubscription(null);
+                          setSubscriptionType('daily');
+                        } else {
+                          const errorData = await response.json();
+                          setError(errorData.error || 'Failed to create subscription');
+                        }
+                      } catch (error) {
+                        console.error('Subscription error:', error);
+                        setError('Failed to create subscription. Please try again.');
+                      }
                     }}
                     style={{ flex: 1, background: COLORS.marigold, border: 'none', borderRadius: 8, padding: 10, fontWeight: 700, cursor: 'pointer' }}
                   >
                     Subscribe
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* WHATSAPP ORDER MODAL */}
+        {showWhatsAppModal && selectedProductForWhatsApp && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}>
+            <div style={{ background: COLORS.card, borderRadius: 16, padding: 24, width: '100%', maxWidth: 450, border: `1px solid ${COLORS.line}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>
+                  Order via WhatsApp
+                </div>
+                <button onClick={() => setShowWhatsAppModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 8 }}>Product</div>
+                <div style={{ fontSize: 14, color: COLORS.ink }}>{selectedProductForWhatsApp.name}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.marigoldDark, marginTop: 4 }}>{formatCurrency(selectedProductForWhatsApp.price)}</div>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Preferred Delivery Slot</label>
+                <select
+                  value={whatsappSlot}
+                  onChange={(e) => setWhatsappSlot(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                >
+                  <option value="">Select delivery slot</option>
+                  <option value="morning_630_830">Morning 6:30–8:30 AM</option>
+                  <option value="mid_morning_1000_1300">Mid-Morning Bakery 10:00 AM–1:00 PM</option>
+                  <option value="evening_600_830">Evening 6:00–8:30 PM</option>
+                </select>
+              </div>
+
+              <button
+                onClick={handleWhatsAppOrderSubmit}
+                disabled={!whatsappSlot}
+                style={{
+                  width: '100%',
+                  background: whatsappSlot ? '#25D366' : '#ccc',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: 12,
+                  fontWeight: 700,
+                  cursor: whatsappSlot ? 'pointer' : 'not-allowed'
+                }}
+              >
+                <MessageCircle size={16} style={{ marginRight: 8 }} />
+                Continue to WhatsApp
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* SUBSCRIPTION PAUSE MODAL */}
+        {showPauseModal && selectedSubscriptionForPause && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}>
+            <div style={{ background: COLORS.card, borderRadius: 16, padding: 24, width: '100%', maxWidth: 450, border: `1px solid ${COLORS.line}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>
+                  Pause Subscription
+                </div>
+                <button onClick={() => setShowPauseModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 8 }}>Subscription</div>
+                <div style={{ fontSize: 14, color: COLORS.ink }}>{selectedSubscriptionForPause.product_name}</div>
+                <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 4 }}>{selectedSubscriptionForPause.frequency}</div>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Pause Start Date</label>
+                <input
+                  type="date"
+                  value={pauseStartDate}
+                  onChange={(e) => setPauseStartDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Pause End Date</label>
+                <input
+                  type="date"
+                  value={pauseEndDate}
+                  onChange={(e) => setPauseEndDate(e.target.value)}
+                  min={pauseStartDate || new Date().toISOString().split('T')[0]}
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <button
+                onClick={handleCreatePause}
+                disabled={!pauseStartDate || !pauseEndDate}
+                style={{
+                  width: '100%',
+                  background: (pauseStartDate && pauseEndDate) ? COLORS.marigold : '#ccc',
+                  color: COLORS.ink,
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: 12,
+                  fontWeight: 700,
+                  cursor: (pauseStartDate && pauseEndDate) ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Set Pause Period
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* WITHDRAWAL MODAL */}
+        {showWithdrawalModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}>
+            <div style={{ background: COLORS.card, borderRadius: 16, padding: 24, width: '100%', maxWidth: 450, border: `1px solid ${COLORS.line}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>
+                  Withdraw to Bank Account
+                </div>
+                <button onClick={() => setShowWithdrawalModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 8 }}>Available Balance</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: COLORS.marigoldDark }}>₹{walletBalance.toFixed(2)}</div>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Withdrawal Amount *</label>
+                <input
+                  type="number"
+                  value={withdrawalAmount}
+                  onChange={(e) => setWithdrawalAmount(e.target.value)}
+                  max={walletBalance}
+                  min="1"
+                  step="0.01"
+                  placeholder="Enter amount"
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Account Holder Name *</label>
+                <input
+                  type="text"
+                  value={bankAccountName}
+                  onChange={(e) => setBankAccountName(e.target.value)}
+                  placeholder="Name as per bank account"
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Account Number *</label>
+                <input
+                  type="text"
+                  value={bankAccountNumber}
+                  onChange={(e) => setBankAccountNumber(e.target.value)}
+                  placeholder="Bank account number"
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>IFSC Code *</label>
+                <input
+                  type="text"
+                  value={bankIfscCode}
+                  onChange={(e) => setBankIfscCode(e.target.value.toUpperCase())}
+                  placeholder="e.g., SBIN0001234"
+                  maxLength={11}
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink,
+                    textTransform: 'uppercase'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Bank Name (Optional)</label>
+                <input
+                  type="text"
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
+                  placeholder="e.g., State Bank of India"
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <button
+                onClick={handleWithdrawal}
+                disabled={!withdrawalAmount || !bankAccountName || !bankAccountNumber || !bankIfscCode}
+                style={{
+                  width: '100%',
+                  background: (withdrawalAmount && bankAccountName && bankAccountNumber && bankIfscCode) ? COLORS.marigold : '#ccc',
+                  color: COLORS.ink,
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: 12,
+                  fontWeight: 700,
+                  cursor: (withdrawalAmount && bankAccountName && bankAccountNumber && bankIfscCode) ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Submit Withdrawal Request
+              </button>
+
+              <div style={{ fontSize: 11, color: COLORS.inkSoft, marginTop: 12, textAlign: 'center' }}>
+                Withdrawal requests are processed within 3-5 business days
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PARTNERS DIRECTORY MODAL */}
+        {showPartnersDirectory && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}>
+            <div style={{ background: COLORS.card, borderRadius: 16, padding: 24, width: '100%', maxWidth: 600, border: `1px solid ${COLORS.line}`, maxHeight: '90vh', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>
+                  Our Partners
+                </div>
+                <button onClick={() => setShowPartnersDirectory(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+                {partners.map(partner => (
+                  <div
+                    key={partner.id}
+                    id={partner.slug}
+                    style={{ background: COLORS.bg, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 16, cursor: 'pointer' }}
+                    onClick={() => setSelectedPartner(partner)}
+                  >
+                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, marginBottom: 4 }}>{partner.business_name}</div>
+                    <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 8 }}>{partner.locality}</div>
+                    {partner.fssai_verified && (
+                      <div style={{ fontSize: 10, background: '#E8F5E9', color: '#2E7D32', padding: '2px 6px', borderRadius: 4, display: 'inline-block', marginBottom: 8 }}>
+                        FSSAI Verified
+                      </div>
+                    )}
+                    <div style={{ fontSize: 11, color: COLORS.inkSoft, fontStyle: 'italic' }}>{partner.bio}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
