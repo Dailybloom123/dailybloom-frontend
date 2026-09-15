@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import L from 'leaflet';
-import { Package, IndianRupee, Clock, MapPin, Phone, Mail, Calendar, AlertTriangle, CheckCircle, XCircle, ArrowRight, RefreshCw, Plus, User, LogOut, Trash2, Home, Check, ShoppingBag, Search, Sparkles, Archive, RotateCcw, Heart, CreditCard, Banknote, X, MessageCircle, Navigation, Activity, AlertCircle, Edit2 } from 'lucide-react';
+import { Package, IndianRupee, Clock, MapPin, Phone, Mail, Calendar, AlertTriangle, CheckCircle, XCircle, ArrowRight, RefreshCw, Plus, User, LogOut, Trash2, Home, Check, ShoppingBag, Search, Sparkles, Archive, RotateCcw, Heart, CreditCard, Banknote, X, Navigation, Activity, AlertCircle, Edit2 } from 'lucide-react';
 import analytics from './analytics-light.js';
 
 // Enhanced Error Boundary Component with detailed error reporting
@@ -626,65 +626,6 @@ function App() {
     return !isPreOrderWindowOpen();
   };
 
-  // WhatsApp ordering
-  const WHATSAPP_BUSINESS_NUMBER = '919910217309'; // DailyBloom WhatsApp Business number
-  const handleWhatsAppOrder = () => {
-    const orderMessage = formatWhatsAppOrderMessage();
-    const whatsappUrl = `https://wa.me/${WHATSAPP_BUSINESS_NUMBER}?text=${encodeURIComponent(orderMessage)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
-  const formatWhatsAppOrderMessage = () => {
-    if (cartItemCount === 0) {
-      return 'Hi! I would like to place an order with DailyBloom.';
-    }
-
-    let message = `🌸 *New Order - DailyBloom*\n\n`;
-    message += `*Items:*\n`;
-
-    cartItemsList.forEach((item, index) => {
-      message += `${index + 1}. ${item.name} x${item.quantity} - ₹${item.price * item.quantity}\n`;
-    });
-
-    message += `\n*Total: ₹${cartTotal}*\n`;
-    message += `*Delivery Charge: ₹${deliveryCharge}*\n`;
-    message += `*Final Total: ₹${finalTotal}*\n`;
-    message += `Please confirm my order and provide delivery details.`;
-
-    return message;
-  };
-
-  const handleWhatsAppOrderSubmit = () => {
-    if (!selectedProductForWhatsApp || !whatsappSlot) return;
-
-    const product = selectedProductForWhatsApp;
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const defaultAddress = addresses[0] || {};
-
-    let message = `🌸 *DailyBloom - New Order Request*\n\n`;
-    message += `*Customer Name:* ${user.name || 'Customer'}\n`;
-    message += `*Delivery Address:* ${defaultAddress.flat_house_no || ''}, ${defaultAddress.landmark || ''}, ${defaultAddress.locality || ''}\n`;
-    message += `*Delivery Locality:* ${defaultAddress.locality || ''}\n\n`;
-    message += `*Items Ordered:*\n`;
-    message += `• ${product.name} × 1 (${formatCurrency(product.price)})\n\n`;
-
-    const slotLabels = {
-      'morning_630_830': 'Morning 6:30–8:30 AM',
-      'mid_morning_1000_1300': 'Mid-Morning Bakery 10:00 AM–1:00 PM',
-      'evening_600_830': 'Evening 6:00–8:30 PM'
-    };
-    message += `*Preferred Slot:* ${slotLabels[whatsappSlot] || whatsappSlot}\n`;
-    message += `*Order Type:* One-Time Drop\n`;
-    message += `*Order Subtotal:* ${formatCurrency(product.price)}\n`;
-
-    const whatsappUrl = `https://wa.me/${WHATSAPP_BUSINESS_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-
-    setShowWhatsAppModal(false);
-    setSelectedProductForWhatsApp(null);
-    setWhatsappSlot('');
-  };
-
   const [mapPinLocation, setMapPinLocation] = useState({ lat: 26.1445, lng: 91.7362 });
   const [mapLocationSelected, setMapLocationSelected] = useState(false);
   const [mapInitialized, setMapInitialized] = useState(false);
@@ -765,9 +706,6 @@ function App() {
   ]);
   const [complaintText, setComplaintText] = useState('');
   const [showComplaintModal, setShowComplaintModal] = useState(false);
-  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
-  const [selectedProductForWhatsApp, setSelectedProductForWhatsApp] = useState(null);
-  const [whatsappSlot, setWhatsAppSlot] = useState('');
 
   // Partners Directory State
   const [showPartnersDirectory, setShowPartnersDirectory] = useState(false);
@@ -1954,7 +1892,7 @@ const handleVerifyOtp = useCallback(async () => {
               title="Notifications"
               style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: '10px', cursor: 'pointer', color: COLORS.ink, position: 'relative' }}
             >
-              <MessageCircle size={20} />
+              <Archive size={20} />
               {unreadCount > 0 && (
                 <span style={{
                   position: 'absolute',
@@ -2236,16 +2174,6 @@ const handleVerifyOtp = useCallback(async () => {
                                   Subscribe
                                 </button>
                               )}
-                              <button 
-                                onClick={() => {
-                                  setSelectedProductForWhatsApp(product);
-                                  setShowWhatsAppModal(true);
-                                }}
-                                style={{ background: '#25D366', border: 'none', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 11, cursor: 'pointer', color: 'white' }}
-                                title="Order via WhatsApp"
-                              >
-                                <MessageCircle size={12} />
-                              </button>
                               {(!orderStatus.available) ? (
                                 <button 
                                   disabled
@@ -2857,9 +2785,25 @@ const handleVerifyOtp = useCallback(async () => {
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.ink, marginBottom: 8 }}>Cart Items ({cartItemCount})</div>
                 {cartItemsList.map(item => (
-                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', padding: 8, background: '#FAFAFA', borderRadius: 8, marginBottom: 6 }}>
-                    <span>{item.name} × {item.quantity}</span>
-                    <span style={{ fontWeight: 700 }}>{formatCurrency(item.price * item.quantity)}</span>
+                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 8, background: '#FAFAFA', borderRadius: 8, marginBottom: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span>{item.name} × {item.quantity}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <span style={{ fontWeight: 700 }}>{formatCurrency(item.price * item.quantity)}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newCart = { ...cart };
+                          delete newCart[item.id];
+                          setCart(newCart);
+                        }}
+                        style={{ background: 'none', border: 'none', color: COLORS.danger, cursor: 'pointer', padding: 4 }}
+                        title="Remove from cart"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -3479,68 +3423,6 @@ const handleVerifyOtp = useCallback(async () => {
           </div>
         )}
 
-        {/* WHATSAPP ORDER MODAL */}
-        {showWhatsAppModal && selectedProductForWhatsApp && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}>
-            <div style={{ background: COLORS.card, borderRadius: 16, padding: 24, width: '100%', maxWidth: 450, border: `1px solid ${COLORS.line}` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>
-                  Order via WhatsApp
-                </div>
-                <button onClick={() => setShowWhatsAppModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 8 }}>Product</div>
-                <div style={{ fontSize: 14, color: COLORS.ink }}>{selectedProductForWhatsApp.name}</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.marigoldDark, marginTop: 4 }}>{formatCurrency(selectedProductForWhatsApp.price)}</div>
-              </div>
-
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Preferred Delivery Slot</label>
-                <select
-                  value={whatsappSlot}
-                  onChange={(e) => setWhatsappSlot(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: 12,
-                    borderRadius: 8,
-                    border: `1px solid ${COLORS.line}`,
-                    fontSize: 13,
-                    background: '#fff',
-                    color: COLORS.ink
-                  }}
-                >
-                  <option value="">Select delivery slot</option>
-                  <option value="morning_630_830">Morning 6:30–8:30 AM</option>
-                  <option value="mid_morning_1000_1300">Mid-Morning Bakery 10:00 AM–1:00 PM</option>
-                  <option value="evening_600_830">Evening 6:00–8:30 PM</option>
-                </select>
-              </div>
-
-              <button
-                onClick={handleWhatsAppOrderSubmit}
-                disabled={!whatsappSlot}
-                style={{
-                  width: '100%',
-                  background: whatsappSlot ? '#25D366' : '#ccc',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: 12,
-                  fontWeight: 700,
-                  cursor: whatsappSlot ? 'pointer' : 'not-allowed'
-                }}
-              >
-                <MessageCircle size={16} style={{ marginRight: 8 }} />
-                Continue to WhatsApp
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* SUBSCRIPTION PAUSE MODAL */}
         {showPauseModal && selectedSubscriptionForPause && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}>
@@ -3913,33 +3795,6 @@ const handleVerifyOtp = useCallback(async () => {
           </button>
         </div>
       </div>
-
-      {/* WHATSAPP FLOATING BUTTON */}
-      <button
-        onClick={handleWhatsAppOrder}
-        style={{
-          position: 'fixed',
-          bottom: 80,
-          right: 20,
-          width: 56,
-          height: 56,
-          borderRadius: '50%',
-          background: '#25D366',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 12px rgba(37, 211, 102, 0.4)',
-          zIndex: 1000,
-          transition: 'transform 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        title="Order via WhatsApp"
-      >
-        <MessageCircle size={28} color="white" />
-      </button>
 
       {/* FOOTER */}
       {user && (
