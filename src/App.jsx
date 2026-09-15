@@ -1942,8 +1942,8 @@ const handleVerifyOtp = useCallback(async () => {
             </button>
 
             {/* Profile Button */}
-            <button 
-              onClick={() => setShowProfileDropdown(prev => !prev)}
+            <button
+              onMouseEnter={() => setShowProfileDropdown(true)}
               title="My Account"
               style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: '10px', cursor: 'pointer', color: COLORS.ink }}
             >
@@ -2066,7 +2066,7 @@ const handleVerifyOtp = useCallback(async () => {
         </div>
 
         {error && <div style={{ background: '#FDEDE4', color: '#7A3418', padding: '10px 14px', borderRadius: 10, marginBottom: 16 }}>{error}</div>}
-        {successMsg && <div style={{ background: '#E4F0E8', color: COLORS.dairy, padding: '10px 14px', borderRadius: 10, marginBottom: 16 }}>{successMsg}</div>}
+        {successMsg && <div style={{ background: '#FFE4B5', color: '#000000', padding: '10px 14px', borderRadius: 10, marginBottom: 16 }}>{successMsg}</div>}
 
         {/* STORE TAB */}
         {activeTab === 'store' && (
