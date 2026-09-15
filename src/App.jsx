@@ -1941,14 +1941,90 @@ const handleVerifyOtp = useCallback(async () => {
               )}
             </button>
 
-            {/* Profile Button */}
-            <button
+            {/* Profile Button with Dropdown Wrapper */}
+            <div
               onMouseEnter={() => setShowProfileDropdown(true)}
-              title="My Account"
-              style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: '10px', cursor: 'pointer', color: COLORS.ink }}
+              onMouseLeave={() => setShowProfileDropdown(false)}
+              style={{ position: 'relative', display: 'inline-block' }}
             >
-              <User size={20} />
-            </button>
+              <button
+                title="My Account"
+                style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: '10px', cursor: 'pointer', color: COLORS.ink }}
+              >
+                <User size={20} />
+              </button>
+
+              {/* PROFILE DROPDOWN MENU */}
+              {showProfileDropdown && (
+                <div
+                  style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, minWidth: 200, padding: 8 }}
+                >
+
+                  <div style={{ padding: '8px 12px', borderBottom: `1px solid ${COLORS.line}`, marginBottom: 8 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{user?.name || 'User'}</div>
+                    <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 2 }}>
+                      Wallet: <span style={{ fontWeight: 600, color: COLORS.marigoldDark }}>₹{walletBalance.toFixed(2)}</span>
+                      <button
+                        onClick={() => setShowWithdrawalModal(true)}
+                        style={{ background: 'none', border: 'none', color: COLORS.marigoldDark, fontSize: 11, fontWeight: 600, cursor: 'pointer', marginLeft: 8 }}
+                      >
+                        Withdraw
+                      </button>
+                    </div>
+                  </div>
+
+                  <button onClick={() => { setActiveTab('addresses'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    <MapPin size={16} /> Address
+                  </button>
+
+                  <button onClick={() => { setActiveTab('orders'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    <Package size={16} /> Orders
+                  </button>
+
+                  <button onClick={() => { setShowPartnersDirectory(true); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    <User size={16} /> Our Partners
+                  </button>
+
+                  <button onClick={() => { setActiveTab('subscriptions'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    <RefreshCw size={16} /> Subscriptions ({subscriptions.length})
+                  </button>
+
+                  <button onClick={() => { setActiveTab('support'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    <Archive size={16} /> Support ({complaints.length})
+                  </button>
+
+                  <button onClick={() => { setActiveTab('payment-methods'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    <Check size={16} /> Payment Method
+                  </button>
+
+                  <div style={{ borderTop: `1px solid ${COLORS.line}`, marginTop: 8, marginBottom: 8 }}></div>
+
+                  <button onClick={() => {
+                    setProfileForm({ name: user?.name || '', phone: user?.phone || '', email: user?.email || '' });
+                    setIsEditingProfile(false);
+                    setSuccessMsg(null);
+                    setError(null);
+                    setActiveTab('my-account');
+                    setShowProfileDropdown(false);
+                  }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    <User size={16} /> My Account
+                  </button>
+
+                  <button onClick={() => {
+                    setActiveTab('change-password');
+                    setShowProfileDropdown(false);
+                    setError(null);
+                    setSuccessMsg(null);
+                  }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    <RefreshCw size={16} /> Change Password
+                  </button>
+
+                  <button onClick={handleLogout} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.danger }}>
+                    <LogOut size={16} /> Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* NOTIFICATIONS DROPDOWN */}
@@ -1989,78 +2065,6 @@ const handleVerifyOtp = useCallback(async () => {
                   </div>
                 ))
               )}
-            </div>
-          )}
-          
-          {/* PROFILE DROPDOWN MENU */}
-          {showProfileDropdown && (
-            <div 
-              onMouseLeave={() => setShowProfileDropdown(false)}
-              style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, minWidth: 200, padding: 8 }}
-            >
-              
-              <div style={{ padding: '8px 12px', borderBottom: `1px solid ${COLORS.line}`, marginBottom: 8 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{user?.name || 'User'}</div>
-                <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 2 }}>
-                  Wallet: <span style={{ fontWeight: 600, color: COLORS.marigoldDark }}>₹{walletBalance.toFixed(2)}</span>
-                  <button
-                    onClick={() => setShowWithdrawalModal(true)}
-                    style={{ background: 'none', border: 'none', color: COLORS.marigoldDark, fontSize: 11, fontWeight: 600, cursor: 'pointer', marginLeft: 8 }}
-                  >
-                    Withdraw
-                  </button>
-                </div>
-              </div>
-              
-              <button onClick={() => { setActiveTab('addresses'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
-                <MapPin size={16} /> Address
-              </button>
-              
-              <button onClick={() => { setActiveTab('orders'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
-                <Package size={16} /> Orders
-              </button>
-
-              <button onClick={() => { setShowPartnersDirectory(true); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
-                <User size={16} /> Our Partners
-              </button>
-
-              <button onClick={() => { setActiveTab('subscriptions'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
-                <RefreshCw size={16} /> Subscriptions ({subscriptions.length})
-              </button>
-              
-              <button onClick={() => { setActiveTab('support'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
-                <Archive size={16} /> Support ({complaints.length})
-              </button>
-              
-              <button onClick={() => { setActiveTab('payment-methods'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
-                <Check size={16} /> Payment Method
-              </button>
-              
-              <div style={{ borderTop: `1px solid ${COLORS.line}`, marginTop: 8, marginBottom: 8 }}></div>
-              
-              <button onClick={() => {
-                setProfileForm({ name: user?.name || '', phone: user?.phone || '', email: user?.email || '' });
-                setIsEditingProfile(false);
-                setSuccessMsg(null);
-                setError(null);
-                setActiveTab('my-account');
-                setShowProfileDropdown(false);
-              }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
-                <User size={16} /> My Account
-              </button>
-
-              <button onClick={() => {
-                setActiveTab('change-password');
-                setShowProfileDropdown(false);
-                setError(null);
-                setSuccessMsg(null);
-              }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
-                <RefreshCw size={16} /> Change Password
-              </button>
-
-              <button onClick={handleLogout} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.danger }}>
-                <LogOut size={16} /> Sign Out
-              </button>
             </div>
           )}
         </div>
