@@ -457,11 +457,21 @@ function App() {
   const [notificationsPollingInterval, setNotificationsPollingInterval] = useState(null);
 
   const [addresses, setAddresses] = useState([]);
-  
+
   const [cart, setCart] = useState({});
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Auto-clear success message after 3 seconds
+  useEffect(() => {
+    if (successMsg) {
+      const timer = setTimeout(() => {
+        setSuccessMsg(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMsg]);
 
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
