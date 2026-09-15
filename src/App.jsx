@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import L from 'leaflet';
-import { Package, IndianRupee, Clock, MapPin, Phone, Mail, Calendar, AlertTriangle, CheckCircle, XCircle, ArrowRight, RefreshCw, Plus, User, LogOut, Trash2, Home, Check, ShoppingBag, Search, Sparkles, Archive, RotateCcw, Heart, CreditCard, Banknote, X, Navigation, Activity, AlertCircle, Edit2 } from 'lucide-react';
+import { Package, IndianRupee, Clock, MapPin, Phone, Mail, Calendar, AlertTriangle, CheckCircle, XCircle, ArrowRight, RefreshCw, Plus, User, LogOut, Trash2, Home, Check, ShoppingBag, Search, Sparkles, Archive, RotateCcw, Heart, CreditCard, Banknote, X, MessageCircle, Navigation, Activity, AlertCircle, Edit2 } from 'lucide-react';
 import analytics from './analytics-light.js';
 
 // Enhanced Error Boundary Component with detailed error reporting
@@ -706,6 +706,34 @@ function App() {
   ]);
   const [complaintText, setComplaintText] = useState('');
   const [showComplaintModal, setShowComplaintModal] = useState(false);
+
+  // WhatsApp ordering
+  const WHATSAPP_BUSINESS_NUMBER = '919910217309'; // DailyBloom WhatsApp Business number
+  const handleWhatsAppOrder = () => {
+    const orderMessage = formatWhatsAppOrderMessage();
+    const whatsappUrl = `https://wa.me/${WHATSAPP_BUSINESS_NUMBER}?text=${encodeURIComponent(orderMessage)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const formatWhatsAppOrderMessage = () => {
+    if (cartItemCount === 0) {
+      return 'Hi! I would like to place an order with DailyBloom.';
+    }
+
+    let message = `🌸 *New Order - DailyBloom*\n\n`;
+    message += `*Items:*\n`;
+
+    cartItemsList.forEach((item, index) => {
+      message += `${index + 1}. ${item.name} x${item.quantity} - ₹${item.price * item.quantity}\n`;
+    });
+
+    message += `\n*Total: ₹${cartTotal}*\n`;
+    message += `*Delivery Charge: ₹${deliveryCharge}*\n`;
+    message += `*Final Total: ₹${finalTotal}*\n`;
+    message += `Please confirm my order and provide delivery details.`;
+
+    return message;
+  };
 
   // Partners Directory State
   const [showPartnersDirectory, setShowPartnersDirectory] = useState(false);
@@ -1892,7 +1920,7 @@ const handleVerifyOtp = useCallback(async () => {
               title="Notifications"
               style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: '10px', cursor: 'pointer', color: COLORS.ink, position: 'relative' }}
             >
-              <Archive size={20} />
+              <MessageCircle size={20} />
               {unreadCount > 0 && (
                 <span style={{
                   position: 'absolute',
@@ -3795,6 +3823,33 @@ const handleVerifyOtp = useCallback(async () => {
           </button>
         </div>
       </div>
+
+      {/* WHATSAPP FLOATING BUTTON */}
+      <button
+        onClick={handleWhatsAppOrder}
+        style={{
+          position: 'fixed',
+          bottom: 80,
+          right: 20,
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          background: '#25D366',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(37, 211, 102, 0.4)',
+          zIndex: 1000,
+          transition: 'transform 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        title="Order via WhatsApp"
+      >
+        <MessageCircle size={28} color="white" />
+      </button>
 
       {/* FOOTER */}
       {user && (
