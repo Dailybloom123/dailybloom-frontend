@@ -1510,9 +1510,9 @@ const handleVerifyOtp = useCallback(async () => {
     // Track checkout begin
     analytics.trackBeginCheckout(cartItemsList, finalTotal);
 
-    const addressId = selectedAddressId || (addresses[0] && addresses[0].id);
+    const addressId = selectedAddressId;
     if (!addressId) {
-      setError('Please add or select a delivery address');
+      setError('Please select a delivery address to continue');
       setIsLoading(false);
       return;
     }
