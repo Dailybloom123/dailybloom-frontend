@@ -1594,27 +1594,52 @@ const handleVerifyOtp = useCallback(async () => {
 
     // Case 2: Cash on Delivery
     if (selectedPaymentMethod === 'cod') {
-      const newOrder = {
-        id: 'ord_' + Date.now().toString().slice(-4),
-        status: 'pending',
-        total: finalTotal,
-        createdAt: new Date().toISOString(),
-        items: cartItemsList,
-        paymentMethod: 'cod'
+      const authToken = localStorage.getItem('token');
+
+      const newOrderPayload = {
+        address_id: addressId,
+        delivery_date: new Date().toISOString().split('T')[0],
+        delivery_slot: '06:00 AM - 08:00 AM',
+        items: cartItemsList.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity
+        }))
       };
-      setOrders(prev => [...prev, newOrder]);
-      setCart({});
-      setSuccessMsg('Order placed successfully via Cash on Delivery!');
-      playNotificationSound('success');
-      setIsLoading(false);
-      
-      // Track purchase
-      analytics.trackPurchase(newOrder.id, finalTotal, cartItemsList);
-      
-      // Redirect to orders page after a short delay for sound to play
-      setTimeout(() => {
-        setActiveTab('orders');
-      }, 500);
+
+      try {
+        const response = await fetch(`${API_BASE}/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify(newOrderPayload)
+        });
+
+        if (response.ok) {
+          const order = await response.json();
+          setOrders(prev => [...prev, order]);
+          setCart({});
+          setSuccessMsg('Order placed successfully via Cash on Delivery!');
+          playNotificationSound('success');
+          setIsLoading(false);
+
+          // Track purchase
+          analytics.trackPurchase(order.id, finalTotal, cartItemsList);
+
+          // Redirect to orders page after a short delay for sound to play
+          setTimeout(() => {
+            setActiveTab('orders');
+          }, 500);
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || 'Failed to place order');
+          setIsLoading(false);
+        }
+      } catch (err) {
+        setError('Failed to place order. Please try again.');
+        setIsLoading(false);
+      }
       return;
     }
 
