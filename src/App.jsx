@@ -1260,7 +1260,7 @@ function App() {
 const handleGoogleLogin = useCallback(() => {
   try {
     // Initialize Google OAuth flow with direct redirect (more reliable)
-    const clientId = '54659216683-spoq19n9j6sq1dea6opisic3cf1kvetu.apps.googleusercontent.com';
+    const clientId = '54659216683-mpoqi9n9j6sqldeo6opisic3cflkvm1u.apps.googleusercontent.com';
     const port = window.location.port || '5173';
     const redirectUri = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? `http://localhost:${port}`
