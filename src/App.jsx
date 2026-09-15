@@ -1967,7 +1967,7 @@ const handleVerifyOtp = useCallback(async () => {
               {/* PROFILE DROPDOWN MENU */}
               {showProfileDropdown && (
                 <div
-                  style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, minWidth: 200, padding: 8 }}
+                  style={{ position: 'absolute', top: '100%', right: 0, marginTop: 0, paddingTop: 8, background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', zIndex: 1000, minWidth: 200, padding: 8 }}
                 >
 
                   <div style={{ padding: '8px 12px', borderBottom: `1px solid ${COLORS.line}`, marginBottom: 8 }}>
