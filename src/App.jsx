@@ -534,7 +534,8 @@ function App() {
         const response = await fetch(`${API_BASE}/products`);
         if (response.ok) {
           const data = await response.json();
-          setProducts(data.products || []);
+          // Backend returns array directly, not wrapped in { products: [] }
+          setProducts(Array.isArray(data) ? data : []);
         } else {
           // Fallback to mock products if API fails
           console.warn('Failed to load products from API, using mock data');
