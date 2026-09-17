@@ -1615,6 +1615,9 @@ const handleVerifyOtp = useCallback(async () => {
     // Case 2: Cash on Delivery
     if (selectedPaymentMethod === 'cod') {
       const authToken = localStorage.getItem('token');
+      console.log('COD checkout - authToken:', authToken ? 'exists' : 'missing');
+      console.log('COD checkout - addressId:', addressId);
+      console.log('COD checkout - cartItemsList:', cartItemsList);
 
       const newOrderPayload = {
         address_id: addressId,
@@ -1626,7 +1629,10 @@ const handleVerifyOtp = useCallback(async () => {
         }))
       };
 
+      console.log('COD checkout - payload:', newOrderPayload);
+
       try {
+        console.log('COD checkout - calling POST', `${API_BASE}/orders`);
         const response = await fetch(`${API_BASE}/orders`, {
           method: 'POST',
           headers: {
@@ -1636,8 +1642,10 @@ const handleVerifyOtp = useCallback(async () => {
           body: JSON.stringify(newOrderPayload)
         });
 
+        console.log('COD checkout - response status:', response.status);
         if (response.ok) {
           const order = await response.json();
+          console.log('COD checkout - order created:', order);
           setOrders(prev => [...prev, order]);
           setCart({});
           setSuccessMsg('Order placed successfully via Cash on Delivery!');
@@ -1653,11 +1661,13 @@ const handleVerifyOtp = useCallback(async () => {
           }, 500);
         } else {
           const errorData = await response.json();
+          console.error('COD checkout - error:', errorData);
           setError(errorData.error || 'Failed to place order');
           setIsLoading(false);
         }
       } catch (err) {
-        setError('Failed to place order. Please try again.');
+        console.error('COD checkout - exception:', err);
+        setError(err.message || 'Failed to place order');
         setIsLoading(false);
       }
       return;
