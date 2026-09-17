@@ -489,13 +489,15 @@ function App() {
 
   // Memoized filtered products to avoid unnecessary recalculations
   const filteredProducts = useMemo(() => {
-    return products.filter(p => {
+    const filtered = products.filter(p => {
       const matchesCat = !selectedCategory || p.category_id === selectedCategory;
       const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
       const orderStatus = getProductOrderStatus(p);
       const isAvailable = orderStatus.available;
       return matchesCat && matchesSearch && isAvailable;
     });
+    console.log('Filtered products:', filtered.length, 'out of', products.length, 'selectedCategory:', selectedCategory);
+    return filtered;
   }, [selectedCategory, searchQuery, products]);
 
   // Memoized cart total calculation
@@ -532,10 +534,13 @@ function App() {
     const loadProducts = async () => {
       try {
         const response = await fetch(`${API_BASE}/products`);
+        console.log('Products API response status:', response.status);
         if (response.ok) {
           const data = await response.json();
+          console.log('Products API response data:', data);
           // Backend returns array directly, not wrapped in { products: [] }
           const productsArray = Array.isArray(data) ? data : [];
+          console.log('Products array length:', productsArray.length);
           // Fallback to mock products if API returns empty (database not seeded)
           if (productsArray.length === 0) {
             console.warn('No products in database, using mock data');
