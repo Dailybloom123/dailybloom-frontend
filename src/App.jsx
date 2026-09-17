@@ -457,6 +457,7 @@ function App() {
   const [notificationsPollingInterval, setNotificationsPollingInterval] = useState(null);
 
   const [addresses, setAddresses] = useState([]);
+  const [products, setProducts] = useState([]);
 
   const [cart, setCart] = useState({});
   const [error, setError] = useState(null);
@@ -488,22 +489,22 @@ function App() {
 
   // Memoized filtered products to avoid unnecessary recalculations
   const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter(p => {
+    return products.filter(p => {
       const matchesCat = !selectedCategory || p.category_id === selectedCategory;
       const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
       const orderStatus = getProductOrderStatus(p);
       const isAvailable = orderStatus.available;
       return matchesCat && matchesSearch && isAvailable;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, products]);
 
   // Memoized cart total calculation
   const cartTotal = useMemo(() => {
-    return MOCK_PRODUCTS.reduce((total, product) => {
+    return products.reduce((total, product) => {
       const qty = cart[product.id] || 0;
       return total + (product.price * qty);
     }, 0);
-  }, [cart]);
+  }, [cart, products]);
 
   // Memoized delivery charge calculation
   const deliveryCharge = useMemo(() => {
@@ -524,6 +525,29 @@ function App() {
       console.warn('Failed to pre-load Razorpay script');
     });
     analytics.trackPageView('/');
+  }, []);
+
+  // Load products from backend
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/products`);
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data.products || []);
+        } else {
+          // Fallback to mock products if API fails
+          console.warn('Failed to load products from API, using mock data');
+          setProducts(MOCK_PRODUCTS);
+        }
+      } catch (error) {
+        console.error('Failed to load products:', error);
+        // Fallback to mock products on error
+        setProducts(MOCK_PRODUCTS);
+      }
+    };
+
+    loadProducts();
   }, []);
 
   // Load addresses from backend when user is authenticated
@@ -901,10 +925,10 @@ function App() {
 
   const cartItemsList = useMemo(() => {
     return Object.keys(cart).map(id => {
-      const product = MOCK_PRODUCTS.find(p => p.id === id);
+      const product = products.find(p => p.id === id);
       return product ? { ...product, quantity: cart[id] } : null;
     }).filter(Boolean);
-  }, [cart]);
+  }, [cart, products]);
 
   const cartItemCount = useMemo(() => {
     return cartItemsList.reduce((sum, item) => sum + item.quantity, 0);
