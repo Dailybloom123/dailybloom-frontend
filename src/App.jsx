@@ -351,7 +351,18 @@ const isPreOrderWindowOpen = () => {
 };
 
 const getProductOrderStatus = (product) => {
-  if (!product.inStock) {
+  // Handle backend product structure (has is_active, stock fields)
+  if (product.is_active === false) {
+    return { available: false, message: 'Product not available' };
+  }
+  
+  // Check stock if available (backend has stock field)
+  if (product.stock !== undefined && product.stock <= 0) {
+    return { available: false, message: 'Out of Stock' };
+  }
+  
+  // Handle mock product structure (has inStock field)
+  if (product.inStock === false) {
     return { available: false, message: 'Out of Stock' };
   }
   
@@ -490,7 +501,13 @@ function App() {
   // Memoized filtered products to avoid unnecessary recalculations
   const filteredProducts = useMemo(() => {
     const filtered = products.filter(p => {
-      const matchesCat = !selectedCategory || p.category_id === selectedCategory;
+      // Handle both category_id (mock) and category (backend) fields
+      const productCat = p.category_id || p.category;
+      const matchesCat = !selectedCategory || productCat === selectedCategory || 
+                        (selectedCategory === 'cat_dairy' && productCat === 'dairy') ||
+                        (selectedCategory === 'cat_bakery' && productCat === 'bakery') ||
+                        (selectedCategory === 'cat_honey' && productCat === 'honey') ||
+                        (selectedCategory === 'cat_flowers' && productCat === 'flowers');
       const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
       const orderStatus = getProductOrderStatus(p);
       const isAvailable = orderStatus.available;
