@@ -2542,7 +2542,7 @@ const handleVerifyOtp = useCallback(async () => {
                 {orders.map((order) => (
                   <div key={order.id} style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: 20, cursor: 'pointer' }} onClick={() => { setSelectedOrder(order); setShowOrderDetail(true); }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <div style={{ fontWeight: 700, fontSize: 15, color: COLORS.ink }}>Order #{order.id}</div>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: COLORS.ink }}>Order #{order.display_order_id || order.id}</div>
                       <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: '#E4F0E8', color: COLORS.dairy }}>{STATUS_LABELS[order.status] || order.status}</span>
                     </div>
                     <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 8 }}>{formatDateTime(order.createdAt)} · {order.items?.length || 0} items</div>
