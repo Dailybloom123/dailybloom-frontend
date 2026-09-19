@@ -956,7 +956,9 @@ function App() {
   const cartItemsList = useMemo(() => {
     return Object.keys(cart).map(id => {
       const product = products.find(p => p.id === id);
-      return product ? { ...product, quantity: cart[id] } : null;
+      const quantity = cart[id];
+      // Filter out items with zero or negative quantity
+      return product && quantity > 0 ? { ...product, quantity } : null;
     }).filter(Boolean);
   }, [cart, products]);
 
