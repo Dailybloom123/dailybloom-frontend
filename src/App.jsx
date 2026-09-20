@@ -460,6 +460,8 @@ function App() {
   const [currentTheme, setCurrentTheme] = useState({ theme: COLORS.bg, themeLight: COLORS.card });
   const [searchQuery, setSearchQuery] = useState('');
   const [dailyMode, setDailyMode] = useState(false);
+  const [showSubscriptionDropdown, setShowSubscriptionDropdown] = useState(false);
+  const [selectedSubscriptionType, setSelectedSubscriptionType] = useState(null);
   const [orders, setOrders] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
   const [ordersPollingInterval, setOrdersPollingInterval] = useState(null);
@@ -510,17 +512,17 @@ function App() {
                         (selectedCategory === 'cat_honey' && productCat === 'honey') ||
                         (selectedCategory === 'cat_flowers' && productCat === 'flowers');
       
-      // Daily mode: only show subscribable products for Flowers and Dairy
-      const matchesDailyMode = !dailyMode || (selectedCategory !== 'cat_flowers' && selectedCategory !== 'cat_dairy') || p.subscribable;
+      // Subscription filter: only show subscribable products when subscription type is selected
+      const matchesSubscriptionMode = !selectedSubscriptionType || (selectedCategory !== 'cat_flowers' && selectedCategory !== 'cat_dairy') || p.subscribable;
       
       const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
       const orderStatus = getProductOrderStatus(p);
       const isAvailable = orderStatus.available;
-      return matchesCat && matchesDailyMode && matchesSearch && isAvailable;
+      return matchesCat && matchesSubscriptionMode && matchesSearch && isAvailable;
     });
-    console.log('Filtered products:', filtered.length, 'out of', products.length, 'selectedCategory:', selectedCategory, 'dailyMode:', dailyMode);
+    console.log('Filtered products:', filtered.length, 'out of', products.length, 'selectedCategory:', selectedCategory, 'selectedSubscriptionType:', selectedSubscriptionType);
     return filtered;
-  }, [selectedCategory, searchQuery, products, dailyMode]);
+  }, [selectedCategory, searchQuery, products, selectedSubscriptionType]);
 
   // Memoized cart total calculation
   const cartTotal = useMemo(() => {
@@ -2216,37 +2218,71 @@ const handleVerifyOtp = useCallback(async () => {
                     {searchQuery ? `Search Results for "${searchQuery}"` : CATEGORIES.find(c => c.id === selectedCategory)?.name}
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    {/* Daily toggle for Flowers and Dairy */}
+                    {/* Subscription dropdown for Flowers and Dairy */}
                     {(selectedCategory === 'cat_flowers' || selectedCategory === 'cat_dairy') && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: currentTheme.themeLight, padding: '6px 12px', borderRadius: 8, border: `1px solid ${COLORS.line}` }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: COLORS.ink }}>Daily</span>
+                      <div style={{ position: 'relative' }}>
                         <button
-                          onClick={() => setDailyMode(!dailyMode)}
+                          onClick={() => setShowSubscriptionDropdown(!showSubscriptionDropdown)}
                           style={{
-                            width: 44,
-                            height: 24,
-                            borderRadius: 12,
-                            background: dailyMode ? COLORS.marigold : '#ccc',
-                            border: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            background: currentTheme.themeLight,
+                            padding: '6px 12px',
+                            borderRadius: 8,
+                            border: `1px solid ${COLORS.line}`,
                             cursor: 'pointer',
-                            position: 'relative',
-                            transition: 'background 0.2s'
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: COLORS.ink
                           }}
                         >
+                          {selectedSubscriptionType || 'Subscription'}
+                          <ArrowRight size={14} style={{ transform: showSubscriptionDropdown ? 'rotate(90deg)' : 'rotate(0deg)' }} />
+                        </button>
+                        {showSubscriptionDropdown && (
                           <div style={{
                             position: 'absolute',
-                            width: 20,
-                            height: 20,
-                            borderRadius: '50%',
-                            background: 'white',
-                            transform: dailyMode ? 'translateX(20px)' : 'translateX(0)',
-                            transition: 'transform 0.2s'
-                          }} />
-                        </button>
+                            top: '100%',
+                            right: 0,
+                            marginTop: 4,
+                            background: COLORS.card,
+                            border: `1px solid ${COLORS.line}`,
+                            borderRadius: 8,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            zIndex: 10,
+                            minWidth: 150
+                          }}>
+                            {['All Products', 'Daily', 'Alternate Days', 'Custom Days'].map((option) => (
+                              <button
+                                key={option}
+                                onClick={() => {
+                                  setSelectedSubscriptionType(option === 'All Products' ? null : option);
+                                  setDailyMode(option !== 'All Products');
+                                  setShowSubscriptionDropdown(false);
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = currentTheme.themeLight}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                style={{
+                                  width: '100%',
+                                  padding: '8px 12px',
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  textAlign: 'left',
+                                  fontSize: 12,
+                                  color: COLORS.ink
+                                }}
+                              >
+                                {option}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     <button
-                      onClick={() => { setSelectedCategory(null); setSearchQuery(''); setDailyMode(false); }}
+                      onClick={() => { setSelectedCategory(null); setSearchQuery(''); setDailyMode(false); setSelectedSubscriptionType(null); }}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}
                     >
                       <ArrowRight size={16} style={{ transform: 'rotate(180deg)' }} /> Back to Categories
@@ -2311,17 +2347,22 @@ const handleVerifyOtp = useCallback(async () => {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: 15, fontWeight: 700 }}>{formatCurrency(product.price)}</span>
                             <div style={{ display: 'flex', gap: 6 }}>
-                              {/* In Daily mode, subscribable products auto-open subscription modal with daily selected */}
-                              {dailyMode && product.subscribable ? (
+                              {/* When subscription type is selected, auto-open subscription modal with that type */}
+                              {selectedSubscriptionType && product.subscribable ? (
                                 <button
                                   onClick={() => {
                                     setSelectedProductForSubscription(product);
-                                    setSubscriptionType('daily');
+                                    const subTypeMap = {
+                                      'Daily': 'daily',
+                                      'Alternate Days': 'alternate_days',
+                                      'Custom Days': 'custom_days'
+                                    };
+                                    setSubscriptionType(subTypeMap[selectedSubscriptionType] || 'daily');
                                     setShowSubscriptionModal(true);
                                   }}
                                   style={{ background: '#4CAF50', border: 'none', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 11, cursor: 'pointer', color: 'white' }}
                                 >
-                                  Subscribe Daily
+                                  Subscribe {selectedSubscriptionType}
                                 </button>
                               ) : product.subscribable && (
                                 <button
