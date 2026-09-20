@@ -869,6 +869,11 @@ function App() {
 
   // Wallet State
   const [walletBalance, setWalletBalance] = useState(0);
+  const [walletTransactions, setWalletTransactions] = useState([]);
+  const [showTopupModal, setShowTopupModal] = useState(false);
+  const [topupAmount, setTopupAmount] = useState('');
+  const [topupReference, setTopupReference] = useState('');
+  const [topupDescription, setTopupDescription] = useState('');
 
   // Subscription Pause State
   const [showPauseModal, setShowPauseModal] = useState(false);
@@ -997,6 +1002,7 @@ function App() {
           if (response.ok) {
             const data = await response.json();
             setWalletBalance(data.wallet.balance || 0);
+            setWalletTransactions(data.transactions || []);
           }
         } catch (error) {
           console.error('Failed to load wallet balance:', error);
@@ -1006,6 +1012,56 @@ function App() {
 
     loadWalletBalance();
   }, [user]);
+
+  // Handle cash top-up
+  const handleCashTopup = async () => {
+    if (!topupAmount || !topupReference) {
+      setError('Please enter amount and payment reference');
+      return;
+    }
+
+    const amount = parseFloat(topupAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setError('Please enter a valid amount');
+      return;
+    }
+
+    const authToken = localStorage.getItem('token');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE}/wallet/cash-topup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          amount,
+          payment_reference: topupReference,
+          description: topupDescription
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setWalletBalance(data.new_balance);
+        setTopupAmount('');
+        setTopupReference('');
+        setTopupDescription('');
+        setShowTopupModal(false);
+        setSuccessMsg('Cash top-up successful!');
+        playNotificationSound('success');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Top-up failed');
+      }
+    } catch (error) {
+      setError('Failed to process top-up');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Load partners when directory opens
   useEffect(() => {
@@ -2126,6 +2182,12 @@ const handleVerifyOtp = useCallback(async () => {
                     <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{user?.name || 'User'}</div>
                     <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 2 }}>
                       Wallet: <span style={{ fontWeight: 600, color: COLORS.marigoldDark }}>₹{walletBalance.toFixed(2)}</span>
+                      <button
+                        onClick={() => setShowTopupModal(true)}
+                        style={{ background: 'none', border: 'none', color: COLORS.dairy, fontSize: 11, fontWeight: 600, cursor: 'pointer', marginLeft: 8 }}
+                      >
+                        + Top Up
+                      </button>
                       <button
                         onClick={() => setShowWithdrawalModal(true)}
                         style={{ background: 'none', border: 'none', color: COLORS.marigoldDark, fontSize: 11, fontWeight: 600, cursor: 'pointer', marginLeft: 8 }}
@@ -3916,6 +3978,107 @@ const handleVerifyOtp = useCallback(async () => {
               >
                 Plan Vacation
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* CASH TOP-UP MODAL */}
+        {showTopupModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}>
+            <div style={{ background: COLORS.card, borderRadius: 16, padding: 24, width: '100%', maxWidth: 450, border: `1px solid ${COLORS.line}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>
+                  Cash Top-Up
+                </div>
+                <button onClick={() => setShowTopupModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 8 }}>Current Balance</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: COLORS.marigoldDark }}>₹{walletBalance.toFixed(2)}</div>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Top-up Amount *</label>
+                <input
+                  type="number"
+                  value={topupAmount}
+                  onChange={(e) => setTopupAmount(e.target.value)}
+                  min="1"
+                  step="0.01"
+                  placeholder="Enter amount"
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Payment Reference *</label>
+                <input
+                  type="text"
+                  value={topupReference}
+                  onChange={(e) => setTopupReference(e.target.value)}
+                  placeholder="e.g., UTR number, transaction ID"
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Description (Optional)</label>
+                <input
+                  type="text"
+                  value={topupDescription}
+                  onChange={(e) => setTopupDescription(e.target.value)}
+                  placeholder="e.g., Cash deposit at partner store"
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <button
+                onClick={handleCashTopup}
+                disabled={!topupAmount || !topupReference}
+                style={{
+                  width: '100%',
+                  background: (topupAmount && topupReference) ? COLORS.marigold : '#ccc',
+                  color: COLORS.ink,
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: 12,
+                  fontWeight: 700,
+                  cursor: (topupAmount && topupReference) ? 'pointer' : 'not-allowed'
+                }}
+              >
+                {isLoading ? 'Processing...' : 'Submit Top-Up'}
+              </button>
+
+              <div style={{ fontSize: 11, color: COLORS.inkSoft, marginTop: 12, textAlign: 'center' }}>
+                Top-up requests are processed within 1-2 business days
+              </div>
             </div>
           </div>
         )}
