@@ -1994,7 +1994,7 @@ const handleVerifyOtp = useCallback(async () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: COLORS.bg, fontFamily: "Manrope, sans-serif", display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: currentTheme.theme, fontFamily: "Manrope, sans-serif", display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '24px 20px 80px 20px', flex: 1, overflowY: 'auto' }}>
         <div style={{ maxWidth: 840, margin: '0 auto', paddingBottom: 60 }}>
         
@@ -2141,7 +2141,7 @@ const handleVerifyOtp = useCallback(async () => {
                   <div
                     key={notification.id}
                     onClick={() => markNotificationAsRead(notification.id)}
-                    style={{ padding: 12, borderBottom: `1px solid ${COLORS.line}`, cursor: 'pointer', background: notification.read ? 'transparent' : COLORS.bg }}
+                    style={{ padding: 12, borderBottom: `1px solid ${COLORS.line}`, cursor: 'pointer', background: notification.read ? 'transparent' : currentTheme.themeLight }}
                   >
                     <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>
                       {notification.title}
@@ -2218,7 +2218,7 @@ const handleVerifyOtp = useCallback(async () => {
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     {/* Daily toggle for Flowers and Dairy */}
                     {(selectedCategory === 'cat_flowers' || selectedCategory === 'cat_dairy') && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: COLORS.bg, padding: '6px 12px', borderRadius: 8, border: `1px solid ${COLORS.line}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: currentTheme.themeLight, padding: '6px 12px', borderRadius: 8, border: `1px solid ${COLORS.line}` }}>
                         <span style={{ fontSize: 12, fontWeight: 600, color: COLORS.ink }}>Daily</span>
                         <button
                           onClick={() => setDailyMode(!dailyMode)}
@@ -2311,8 +2311,20 @@ const handleVerifyOtp = useCallback(async () => {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: 15, fontWeight: 700 }}>{formatCurrency(product.price)}</span>
                             <div style={{ display: 'flex', gap: 6 }}>
-                              {product.subscribable && (
-                                <button 
+                              {/* In Daily mode, subscribable products auto-open subscription modal with daily selected */}
+                              {dailyMode && product.subscribable ? (
+                                <button
+                                  onClick={() => {
+                                    setSelectedProductForSubscription(product);
+                                    setSubscriptionType('daily');
+                                    setShowSubscriptionModal(true);
+                                  }}
+                                  style={{ background: '#4CAF50', border: 'none', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 11, cursor: 'pointer', color: 'white' }}
+                                >
+                                  Subscribe Daily
+                                </button>
+                              ) : product.subscribable && (
+                                <button
                                   onClick={() => {
                                     setSelectedProductForSubscription(product);
                                     setShowSubscriptionModal(true);
@@ -2341,7 +2353,7 @@ const handleVerifyOtp = useCallback(async () => {
                                   {product.preOrder || product.earlyMorningDelivery ? 'Pre-order' : 'Add'}
                                 </button>
                               ) : (
-                                <div style={{ display: 'flex', alignItems: 'center', background: COLORS.bg, borderRadius: 8, border: `1px solid ${COLORS.line}` }}>
+                                <div style={{ display: 'flex', alignItems: 'center', background: currentTheme.themeLight, borderRadius: 8, border: `1px solid ${COLORS.line}` }}>
                                   <button onClick={() => {
                                     const newQty = Math.max(0, qty - 1);
                                     setCart(prev => ({ ...prev, [product.id]: newQty }));
@@ -2622,7 +2634,7 @@ const handleVerifyOtp = useCallback(async () => {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {subscriptions.map((sub) => (
-                  <div key={sub.id} style={{ background: COLORS.bg, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 16 }}>
+                  <div key={sub.id} style={{ background: currentTheme.themeLight, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                       <div style={{ fontWeight: 700, fontSize: 15, color: COLORS.ink }}>{sub.product_name}</div>
                       <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: sub.status === 'active' ? '#E4F0E8' : '#FFF4E6', color: sub.status === 'active' ? COLORS.dairy : COLORS.marigold }}>{sub.status}</span>
@@ -3471,7 +3483,7 @@ const handleVerifyOtp = useCallback(async () => {
                   </label>
 
                   {subscriptionType === 'custom_days' && (
-                    <div style={{ marginTop: 8, padding: 12, background: COLORS.bg, borderRadius: 8 }}>
+                    <div style={{ marginTop: 8, padding: 12, background: currentTheme.themeLight, borderRadius: 8 }}>
                       <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.ink, marginBottom: 8 }}>Select days:</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
@@ -3809,7 +3821,7 @@ const handleVerifyOtp = useCallback(async () => {
                   <button onClick={() => setSelectedPartnerDetails(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.dairy, fontWeight: 600, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
                     <ArrowLeft size={16} /> Back to Partners
                   </button>
-                  <div style={{ background: COLORS.bg, borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                  <div style={{ background: currentTheme.themeLight, borderRadius: 12, padding: 20, marginBottom: 16 }}>
                     <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.ink, marginBottom: 8 }}>{selectedPartnerDetails.partner.business_name}</div>
                     <div style={{ fontSize: 14, color: COLORS.inkSoft, marginBottom: 12 }}>{selectedPartnerDetails.partner.bio}</div>
                     <div style={{ fontSize: 13, color: COLORS.ink, marginBottom: 4 }}>📍 {selectedPartnerDetails.partner.locality}</div>
@@ -3861,7 +3873,7 @@ const handleVerifyOtp = useCallback(async () => {
                     <div
                       key={partner.id}
                       id={partner.slug}
-                      style={{ background: COLORS.bg, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 16, cursor: 'pointer' }}
+                      style={{ background: currentTheme.themeLight, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 16, cursor: 'pointer' }}
                       onClick={() => loadPartnerDetails(partner)}
                     >
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, marginBottom: 4 }}>{partner.business_name}</div>
