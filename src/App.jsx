@@ -2078,7 +2078,7 @@ const handleVerifyOtp = useCallback(async () => {
                   </button>
 
                   <button onClick={() => { setActiveTab('subscriptions'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
-                    <RefreshCw size={16} /> Subscriptions ({subscriptions.length})
+                    <RefreshCw size={16} /> Daily ({subscriptions.length})
                   </button>
 
                   <button onClick={() => { setActiveTab('support'); setShowProfileDropdown(false); }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 12px', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
@@ -2664,12 +2664,12 @@ const handleVerifyOtp = useCallback(async () => {
         {/* SUBSCRIPTIONS TAB */}
         {activeTab === 'subscriptions' && (
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink, marginBottom: 20 }}>My Subscriptions</div>
+            <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink, marginBottom: 20 }}>My Daily</div>
             {subscriptions.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 40 }}>
                 <RefreshCw size={32} color={COLORS.inkSoft} style={{ marginBottom: 12 }} />
-                <div style={{ fontSize: 16, fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>No subscriptions found</div>
-                <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 16 }}>Subscribe to products for regular deliveries</div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>No daily deliveries found</div>
+                <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 16 }}>Subscribe to products for regular daily deliveries</div>
                 <button onClick={() => { setActiveTab('store'); setSelectedCategory(null); }} style={{ background: COLORS.marigold, border: 'none', borderRadius: 8, padding: '10px 20px', fontWeight: 700, cursor: 'pointer' }}>Browse Products</button>
               </div>
             ) : (
