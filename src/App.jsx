@@ -466,6 +466,7 @@ function App() {
   const [orders, setOrders] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
   const [vacations, setVacations] = useState([]);
+  const [customerAssets, setCustomerAssets] = useState([]);
   const [showVacationModal, setShowVacationModal] = useState(false);
   const [vacationForm, setVacationForm] = useState({ subscription_id: null, start_date: '', end_date: '' });
   const [ordersPollingInterval, setOrdersPollingInterval] = useState(null);
@@ -678,6 +679,26 @@ function App() {
       }
     };
     loadVacations();
+  }, [user, authToken]);
+
+  // Load customer assets
+  useEffect(() => {
+    const loadAssets = async () => {
+      if (user && authToken) {
+        try {
+          const response = await fetch(`${API_BASE}/empties/my-assets`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setCustomerAssets(data.assets || []);
+          }
+        } catch (error) {
+          console.error('Failed to load assets:', error);
+        }
+      }
+    };
+    loadAssets();
   }, [user, authToken]);
 
   // New Address Form State
@@ -2722,6 +2743,19 @@ const handleVerifyOtp = useCallback(async () => {
                 + Plan Vacation
               </button>
             </div>
+
+            {/* Empties Balance Display */}
+            {customerAssets.length > 0 && (
+              <div style={{ background: '#E8F5E9', border: '1px solid #4CAF50', borderRadius: 8, padding: 12, marginBottom: 20 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#2E7D32', marginBottom: 8 }}>Your Bottle Balance</div>
+                {customerAssets.map(asset => (
+                  <div key={asset.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#1B5E20' }}>
+                    <span>{asset.asset_type.charAt(0).toUpperCase() + asset.asset_type.slice(1)}s</span>
+                    <span style={{ fontWeight: 700 }}>{asset.quantity}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             {subscriptions.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 40 }}>
                 <RefreshCw size={32} color={COLORS.inkSoft} style={{ marginBottom: 12 }} />
