@@ -465,6 +465,9 @@ function App() {
   const [afterCutoff, setAfterCutoff] = useState(false);
   const [orders, setOrders] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [vacations, setVacations] = useState([]);
+  const [showVacationModal, setShowVacationModal] = useState(false);
+  const [vacationForm, setVacationForm] = useState({ subscription_id: null, start_date: '', end_date: '' });
   const [ordersPollingInterval, setOrdersPollingInterval] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -656,6 +659,26 @@ function App() {
     const interval = setInterval(checkCutoffStatus, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  // Load vacations
+  useEffect(() => {
+    const loadVacations = async () => {
+      if (user && authToken) {
+        try {
+          const response = await fetch(`${API_BASE}/vacations`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setVacations(data.vacations || []);
+          }
+        } catch (error) {
+          console.error('Failed to load vacations:', error);
+        }
+      }
+    };
+    loadVacations();
+  }, [user, authToken]);
 
   // New Address Form State
   const [newAddressForm, setNewAddressForm] = useState({
@@ -2690,7 +2713,15 @@ const handleVerifyOtp = useCallback(async () => {
         {/* SUBSCRIPTIONS TAB */}
         {activeTab === 'subscriptions' && (
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink, marginBottom: 20 }}>My Daily</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>My Daily</div>
+              <button
+                onClick={() => setShowVacationModal(true)}
+                style={{ background: '#FFF3E0', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 600, fontSize: 12, cursor: 'pointer', color: COLORS.marigoldDark }}
+              >
+                + Plan Vacation
+              </button>
+            </div>
             {subscriptions.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 40 }}>
                 <RefreshCw size={32} color={COLORS.inkSoft} style={{ marginBottom: 12 }} />
@@ -3722,6 +3753,134 @@ const handleVerifyOtp = useCallback(async () => {
                 }}
               >
                 Set Pause Period
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* VACATION MODAL */}
+        {showVacationModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}>
+            <div style={{ background: COLORS.card, borderRadius: 16, padding: 24, width: '100%', maxWidth: 450, border: `1px solid ${COLORS.line}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>
+                  Plan Vacation
+                </div>
+                <button onClick={() => setShowVacationModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Select Subscription</label>
+                <select
+                  value={vacationForm.subscription_id || ''}
+                  onChange={(e) => setVacationForm({ ...vacationForm, subscription_id: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                >
+                  <option value="">Choose a subscription...</option>
+                  {subscriptions.map(sub => (
+                    <option key={sub.id} value={sub.id}>{sub.product_name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>Start Date</label>
+                <input
+                  type="date"
+                  value={vacationForm.start_date}
+                  onChange={(e) => setVacationForm({ ...vacationForm, start_date: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, display: 'block', marginBottom: 8 }}>End Date</label>
+                <input
+                  type="date"
+                  value={vacationForm.end_date}
+                  onChange={(e) => setVacationForm({ ...vacationForm, end_date: e.target.value })}
+                  min={vacationForm.start_date || new Date().toISOString().split('T')[0]}
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderRadius: 8,
+                    border: `1px solid ${COLORS.line}`,
+                    fontSize: 13,
+                    background: '#fff',
+                    color: COLORS.ink
+                  }}
+                />
+              </div>
+
+              <button
+                onClick={async () => {
+                  if (!vacationForm.subscription_id || !vacationForm.start_date || !vacationForm.end_date) {
+                    setError('Please fill all fields');
+                    return;
+                  }
+                  try {
+                    const authToken = localStorage.getItem('token');
+                    const response = await fetch(`${API_BASE}/vacations`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                      },
+                      body: JSON.stringify(vacationForm)
+                    });
+                    if (response.ok) {
+                      setSuccessMsg('Vacation planned successfully');
+                      setShowVacationModal(false);
+                      setVacationForm({ subscription_id: null, start_date: '', end_date: '' });
+                      // Reload vacations
+                      const vacationsResponse = await fetch(`${API_BASE}/vacations`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                      });
+                      if (vacationsResponse.ok) {
+                        const data = await vacationsResponse.json();
+                        setVacations(data.vacations || []);
+                      }
+                    } else {
+                      const errorData = await response.json();
+                      setError(errorData.error || 'Failed to plan vacation');
+                    }
+                  } catch (error) {
+                    console.error('Vacation error:', error);
+                    setError('Failed to plan vacation. Please try again.');
+                  }
+                }}
+                disabled={!vacationForm.subscription_id || !vacationForm.start_date || !vacationForm.end_date}
+                style={{
+                  width: '100%',
+                  background: (vacationForm.subscription_id && vacationForm.start_date && vacationForm.end_date) ? COLORS.marigold : '#ccc',
+                  color: COLORS.ink,
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: 12,
+                  fontWeight: 700,
+                  cursor: (vacationForm.subscription_id && vacationForm.start_date && vacationForm.end_date) ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Plan Vacation
               </button>
             </div>
           </div>
