@@ -462,6 +462,7 @@ function App() {
   const [dailyMode, setDailyMode] = useState(false);
   const [showSubscriptionDropdown, setShowSubscriptionDropdown] = useState(false);
   const [selectedSubscriptionType, setSelectedSubscriptionType] = useState(null);
+  const [afterCutoff, setAfterCutoff] = useState(false);
   const [orders, setOrders] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
   const [ordersPollingInterval, setOrdersPollingInterval] = useState(null);
@@ -636,7 +637,26 @@ function App() {
 
     loadSubscriptions();
   }, [user]);
-  
+
+  // Check cutoff status
+  useEffect(() => {
+    const checkCutoffStatus = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/orders/cutoff-status`);
+        if (response.ok) {
+          const data = await response.json();
+          setAfterCutoff(data.afterCutoff);
+        }
+      } catch (error) {
+        console.error('Failed to check cutoff status:', error);
+      }
+    };
+    checkCutoffStatus();
+    // Check every minute
+    const interval = setInterval(checkCutoffStatus, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   // New Address Form State
   const [newAddressForm, setNewAddressForm] = useState({
     orderingFor: 'Myself',
@@ -2003,6 +2023,12 @@ const handleVerifyOtp = useCallback(async () => {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, position: 'relative' }}>
           <h2 style={{ fontFamily: "Fraunces, serif", margin: 0, color: COLORS.ink, cursor: 'pointer' }} onClick={() => { setActiveTab('store'); setSelectedCategory(null); }}>DailyBloom</h2>
+          
+          {afterCutoff && (
+            <div style={{ background: '#FFF3E0', padding: '8px 12px', borderRadius: 8, border: '1px solid #FF9800', fontSize: 11, fontWeight: 600, color: '#E65100' }}>
+              ⚠️ Orders after 9 PM will be delivered the day after tomorrow
+            </div>
+          )}
           
           <div style={{ display: 'flex', gap: 8 }}>
             {/* Notification Bell */}
