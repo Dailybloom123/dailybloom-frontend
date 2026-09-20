@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import L from 'leaflet';
-import { Package, IndianRupee, Clock, MapPin, Phone, Mail, Calendar, AlertTriangle, CheckCircle, XCircle, ArrowRight, RefreshCw, Plus, User, LogOut, Trash2, Home, Check, ShoppingBag, Search, Sparkles, Archive, RotateCcw, Heart, CreditCard, Banknote, X, MessageCircle, Navigation, Activity, AlertCircle, Edit2 } from 'lucide-react';
+import { Package, IndianRupee, Clock, MapPin, Phone, Mail, Calendar, AlertTriangle, CheckCircle, XCircle, ArrowRight, ArrowLeft, RefreshCw, Plus, User, LogOut, Trash2, Home, Check, ShoppingBag, Search, Sparkles, Archive, RotateCcw, Heart, CreditCard, Banknote, X, MessageCircle, Navigation, Activity, AlertCircle, Edit2 } from 'lucide-react';
 import analytics from './analytics-light.js';
 
 // Enhanced Error Boundary Component with detailed error reporting
@@ -793,6 +793,8 @@ function App() {
   const [showPartnersDirectory, setShowPartnersDirectory] = useState(false);
   const [partners, setPartners] = useState([]);
   const [selectedPartner, setSelectedPartner] = useState(null);
+  const [selectedPartnerDetails, setSelectedPartnerDetails] = useState(null);
+  const [loadingPartnerDetails, setLoadingPartnerDetails] = useState(false);
 
   // Wallet State
   const [walletBalance, setWalletBalance] = useState(0);
@@ -952,6 +954,22 @@ function App() {
       loadPartners();
     }
   }, [showPartnersDirectory, partners.length]);
+
+  // Load partner details when partner is selected
+  const loadPartnerDetails = async (partner) => {
+    setLoadingPartnerDetails(true);
+    try {
+      const response = await fetch(`${API_BASE}/partners-directory/${partner.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedPartnerDetails(data);
+      }
+    } catch (error) {
+      console.error('Failed to load partner details:', error);
+    } finally {
+      setLoadingPartnerDetails(false);
+    }
+  };
 
   const cartItemsList = useMemo(() => {
     return Object.keys(cart).map(id => {
@@ -3744,30 +3762,84 @@ const handleVerifyOtp = useCallback(async () => {
                 <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>
                   Our Partners
                 </div>
-                <button onClick={() => setShowPartnersDirectory(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
+                <button onClick={() => { setShowPartnersDirectory(false); setSelectedPartnerDetails(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft }}>
                   <X size={20} />
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
-                {partners.map(partner => (
-                  <div
-                    key={partner.id}
-                    id={partner.slug}
-                    style={{ background: COLORS.bg, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 16, cursor: 'pointer' }}
-                    onClick={() => setSelectedPartner(partner)}
-                  >
-                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, marginBottom: 4 }}>{partner.business_name}</div>
-                    <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 8 }}>{partner.locality}</div>
-                    {partner.fssai_verified && (
-                      <div style={{ fontSize: 10, background: '#E8F5E9', color: '#2E7D32', padding: '2px 6px', borderRadius: 4, display: 'inline-block', marginBottom: 8 }}>
-                        FSSAI Verified
+              {selectedPartnerDetails ? (
+                // Partner Detail View
+                <div>
+                  <button onClick={() => setSelectedPartnerDetails(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.dairy, fontWeight: 600, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <ArrowLeft size={16} /> Back to Partners
+                  </button>
+                  <div style={{ background: COLORS.bg, borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.ink, marginBottom: 8 }}>{selectedPartnerDetails.partner.business_name}</div>
+                    <div style={{ fontSize: 14, color: COLORS.inkSoft, marginBottom: 12 }}>{selectedPartnerDetails.partner.bio}</div>
+                    <div style={{ fontSize: 13, color: COLORS.ink, marginBottom: 4 }}>📍 {selectedPartnerDetails.partner.locality}</div>
+                    <div style={{ fontSize: 13, color: COLORS.ink, marginBottom: 4 }}>📞 {selectedPartnerDetails.partner.phone || 'Contact available'}</div>
+                    <div style={{ fontSize: 13, color: COLORS.ink, marginBottom: 12 }}>📧 {selectedPartnerDetails.partner.email || 'Email available'}</div>
+                    
+                    {selectedPartnerDetails.partner.fssai_verified && (
+                      <div style={{ background: '#E8F5E9', padding: 12, borderRadius: 8, marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: '#2E7D32', marginBottom: 4 }}>✓ FSSAI Verified</div>
+                        <div style={{ fontSize: 12, color: '#1B5E20' }}>License: {selectedPartnerDetails.partner.fssai_number}</div>
+                        {selectedPartnerDetails.partner.fssai_expiry_date && (
+                          <div style={{ fontSize: 12, color: '#1B5E20' }}>Valid until: {new Date(selectedPartnerDetails.partner.fssai_expiry_date).toLocaleDateString()}</div>
+                        )}
+                        {selectedPartnerDetails.partner.fssai_certificate_url && (
+                          <a href={selectedPartnerDetails.partner.fssai_certificate_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#2E7D32', textDecoration: 'underline' }}>View Certificate</a>
+                        )}
                       </div>
                     )}
-                    <div style={{ fontSize: 11, color: COLORS.inkSoft, fontStyle: 'italic' }}>{partner.bio}</div>
+
+                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 8 }}>Specialties:</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                      {selectedPartnerDetails.partner.specialty_tags?.map((tag, index) => (
+                        <span key={index} style={{ fontSize: 11, background: COLORS.dairy, color: 'white', padding: '4px 8px', borderRadius: 12 }}>{tag}</span>
+                      ))}
+                    </div>
+
+                    <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.ink, marginBottom: 8 }}>Products:</div>
+                    {selectedPartnerDetails.products?.length > 0 ? (
+                      <div style={{ display: 'grid', gap: 8 }}>
+                        {selectedPartnerDetails.products.map(product => (
+                          <div key={product.id} style={{ display: 'flex', justifyContent: 'space-between', padding: 8, background: 'white', borderRadius: 6, border: `1px solid ${COLORS.line}` }}>
+                            <div>
+                              <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink }}>{product.name}</div>
+                              <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{product.category}</div>
+                            </div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.dairy }}>₹{product.price}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 12, color: COLORS.inkSoft }}>No products available</div>
+                    )}
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                // Partners List View
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+                  {partners.map(partner => (
+                    <div
+                      key={partner.id}
+                      id={partner.slug}
+                      style={{ background: COLORS.bg, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 16, cursor: 'pointer' }}
+                      onClick={() => loadPartnerDetails(partner)}
+                    >
+                      <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, marginBottom: 4 }}>{partner.business_name}</div>
+                      <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 8 }}>{partner.locality}</div>
+                      {partner.fssai_verified && (
+                        <div style={{ fontSize: 10, background: '#E8F5E9', color: '#2E7D32', padding: '2px 6px', borderRadius: 4, display: 'inline-block', marginBottom: 8 }}>
+                          FSSAI Verified
+                        </div>
+                      )}
+                      <div style={{ fontSize: 11, color: COLORS.inkSoft, fontStyle: 'italic' }}>{partner.bio}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
