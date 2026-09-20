@@ -459,6 +459,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentTheme, setCurrentTheme] = useState({ theme: COLORS.bg, themeLight: COLORS.card });
   const [searchQuery, setSearchQuery] = useState('');
+  const [dailyMode, setDailyMode] = useState(false);
   const [orders, setOrders] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
   const [ordersPollingInterval, setOrdersPollingInterval] = useState(null);
@@ -503,19 +504,23 @@ function App() {
     const filtered = products.filter(p => {
       // Handle both category_id (mock) and category (backend) fields
       const productCat = p.category_id || p.category;
-      const matchesCat = !selectedCategory || productCat === selectedCategory || 
+      const matchesCat = !selectedCategory || productCat === selectedCategory ||
                         (selectedCategory === 'cat_dairy' && productCat === 'dairy') ||
                         (selectedCategory === 'cat_bakery' && productCat === 'bakery') ||
                         (selectedCategory === 'cat_honey' && productCat === 'honey') ||
                         (selectedCategory === 'cat_flowers' && productCat === 'flowers');
+      
+      // Daily mode: only show subscribable products for Flowers and Dairy
+      const matchesDailyMode = !dailyMode || (selectedCategory !== 'cat_flowers' && selectedCategory !== 'cat_dairy') || p.subscribable;
+      
       const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
       const orderStatus = getProductOrderStatus(p);
       const isAvailable = orderStatus.available;
-      return matchesCat && matchesSearch && isAvailable;
+      return matchesCat && matchesDailyMode && matchesSearch && isAvailable;
     });
-    console.log('Filtered products:', filtered.length, 'out of', products.length, 'selectedCategory:', selectedCategory);
+    console.log('Filtered products:', filtered.length, 'out of', products.length, 'selectedCategory:', selectedCategory, 'dailyMode:', dailyMode);
     return filtered;
-  }, [selectedCategory, searchQuery, products]);
+  }, [selectedCategory, searchQuery, products, dailyMode]);
 
   // Memoized cart total calculation
   const cartTotal = useMemo(() => {
@@ -2210,12 +2215,43 @@ const handleVerifyOtp = useCallback(async () => {
                   <div style={{ fontFamily: "Fraunces, serif", fontSize: 18, fontWeight: 700, color: COLORS.ink }}>
                     {searchQuery ? `Search Results for "${searchQuery}"` : CATEGORIES.find(c => c.id === selectedCategory)?.name}
                   </div>
-                  <button
-                    onClick={() => { setSelectedCategory(null); setSearchQuery(''); }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}
-                  >
-                    <ArrowRight size={16} style={{ transform: 'rotate(180deg)' }} /> Back to Categories
-                  </button>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    {/* Daily toggle for Flowers and Dairy */}
+                    {(selectedCategory === 'cat_flowers' || selectedCategory === 'cat_dairy') && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: COLORS.bg, padding: '6px 12px', borderRadius: 8, border: `1px solid ${COLORS.line}` }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: COLORS.ink }}>Daily</span>
+                        <button
+                          onClick={() => setDailyMode(!dailyMode)}
+                          style={{
+                            width: 44,
+                            height: 24,
+                            borderRadius: 12,
+                            background: dailyMode ? COLORS.marigold : '#ccc',
+                            border: 'none',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            transition: 'background 0.2s'
+                          }}
+                        >
+                          <div style={{
+                            position: 'absolute',
+                            width: 20,
+                            height: 20,
+                            borderRadius: '50%',
+                            background: 'white',
+                            transform: dailyMode ? 'translateX(20px)' : 'translateX(0)',
+                            transition: 'transform 0.2s'
+                          }} />
+                        </button>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => { setSelectedCategory(null); setSearchQuery(''); setDailyMode(false); }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: COLORS.inkSoft, display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}
+                    >
+                      <ArrowRight size={16} style={{ transform: 'rotate(180deg)' }} /> Back to Categories
+                    </button>
+                  </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
