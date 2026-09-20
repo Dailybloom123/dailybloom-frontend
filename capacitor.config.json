@@ -1,0 +1,23 @@
+{
+  "appId": "com.dailybloom.app",
+  "appName": "DailyBloom",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#F6F7F2",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "androidSpinnerStyle": "large",
+      "spinnerColor": "#E8A33D",
+      "iosSpinnerStyle": "large",
+      "spinnerColor": "#E8A33D"
+    }
+  }
+}
