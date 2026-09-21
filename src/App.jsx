@@ -664,6 +664,7 @@ function App() {
   // Load vacations
   useEffect(() => {
     const loadVacations = async () => {
+      const authToken = localStorage.getItem('token');
       if (user && authToken) {
         try {
           const response = await fetch(`${API_BASE}/vacations`, {
@@ -679,11 +680,12 @@ function App() {
       }
     };
     loadVacations();
-  }, [user, authToken]);
+  }, [user]);
 
   // Load customer assets
   useEffect(() => {
     const loadAssets = async () => {
+      const authToken = localStorage.getItem('token');
       if (user && authToken) {
         try {
           const response = await fetch(`${API_BASE}/empties/my-assets`, {
@@ -699,7 +701,7 @@ function App() {
       }
     };
     loadAssets();
-  }, [user, authToken]);
+  }, [user]);
 
   // New Address Form State
   const [newAddressForm, setNewAddressForm] = useState({
