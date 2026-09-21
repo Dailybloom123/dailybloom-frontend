@@ -14,9 +14,20 @@ body {
 
 #root {
   width: 100%;
-  max-width: 480px; 
+  max-width: 480px;
   display: flex;
   flex-direction: column;
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  body {
+    padding: 0;
+  }
+
+  #root {
+    max-width: 100%;
+  }
 }
 
 input:-webkit-autofill,
@@ -45,6 +56,20 @@ input:-webkit-autofill:active {
 
 .custom-marker {
   z-index: 1000;
+}
+
+/* Touch action optimization */
+* {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area for notched phones */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
 }
 
 body {

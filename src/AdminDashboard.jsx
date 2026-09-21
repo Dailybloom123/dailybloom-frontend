@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { RefreshCw, Lock, Package, IndianRupee, Clock, MapPin, Phone, Mail, ChevronDown, ChevronUp, Calendar, AlertTriangle, XCircle, Plus, Users, Building2, Store, TrendingUp, Shield, Edit, Trash2, MessageCircle, Send } from 'lucide-react';
 import * as Sentry from '@sentry/react';
 
-const API_BASE = 'http://localhost:4000/api';
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:4000/api'
+  : 'https://dailybloom-x82y.onrender.com/api';
 const DAILYBLOOM_WHATSAPP_BUSINESS = '919910217309';
 
 // WhatsApp Business Functions

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Home, ShoppingCart, ClipboardList, User, ChevronLeft, X } from 'lucide-react';
 
-const API_BASE = 'http://localhost:4000/api';
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:4000/api'
+  : 'https://dailybloom-x82y.onrender.com/api';
 
 const COLORS = {
   bg: '#F8F9F5',
