@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "serve -s dist -l 3000",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui"
@@ -37,7 +36,6 @@
     "autoprefixer": "^10.5.5",
     "jsdom": "^24.0.0",
     "postcss": "^8.5.28",
-    "serve": "^14.2.1",
     "vite": "^5.4.0",
     "vitest": "^1.4.0"
   }
