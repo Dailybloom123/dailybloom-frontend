@@ -1,0 +1,11 @@
+version: 1
+builds:
+  - type: web
+    name: dailybloom-frontend
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npx serve -s dist -l 3000
+    envVars:
+      - key: NODE_VERSION
+        value: 18
