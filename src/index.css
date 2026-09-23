@@ -69,50 +69,20 @@ input:-webkit-autofill:active {
   body {
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
+    padding-top: max(0px, env(safe-area-inset-top));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
   }
 }
 
-body {
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  padding: 40px 16px;
-  background: #EDEDE3;
-  min-height: 100vh;
-  box-sizing: border-box;
-}
-
 #root {
-  width: 100%;
-  max-width: 480px; 
-  display: flex;
-  flex-direction: column;
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+  min-height: 100vh;
+  min-height: 100dvh; /* Use dynamic viewport height for mobile */
 }
 
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
- -webkit-box-shadow: 0 0 0 1000px #EDEDE3 inset !important;
- -webkit-text-fill-color: #000 !important;
- caret-color: #000 !important;
- transition: background-color 5000s ease-in-out 0s;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-/* Leaflet map styles */
-.leaflet-container {
-  background: #e8e8e8;
-}
-
-.custom-marker {
-  z-index: 1000;
+/* Ensure bottom navigation doesn't get hidden behind mobile browser toolbar */
+@supports (padding-bottom: max(0px)) {
+  .bottom-nav {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
 }
