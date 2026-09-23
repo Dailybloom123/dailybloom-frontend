@@ -1990,7 +1990,7 @@ const handleVerifyOtp = useCallback(async () => {
     return (
       <div style={{ minHeight: '100vh', background: COLORS.bg, padding: '24px 20px' }}>
         <div style={{ maxWidth: 400, margin: '60px auto', textAlign: 'center' }}>
-          <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 32, color: COLORS.ink, marginBottom: 8 }}>DailyBloom</h1>
+          <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 32, color: COLORS.ink, marginBottom: 8 }}>DailyBloom — नवोदयः —</h1>
           <p style={{ color: COLORS.inkSoft, marginBottom: 24 }}>Fresh daily morning essentials delivered 6AM–8AM in Guwahati</p>
           
           {/* Email/Phone Login */}
@@ -2124,7 +2124,7 @@ const handleVerifyOtp = useCallback(async () => {
         
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, position: 'relative' }}>
-          <h2 style={{ fontFamily: "Fraunces, serif", margin: 0, color: COLORS.ink, cursor: 'pointer' }} onClick={() => { setActiveTab('store'); setSelectedCategory(null); }}>DailyBloom</h2>
+          <h2 style={{ fontFamily: "Fraunces, serif", margin: 0, color: COLORS.ink, cursor: 'pointer' }} onClick={() => { setActiveTab('store'); setSelectedCategory(null); }}>DailyBloom — नवोदयः —</h2>
           
           {afterCutoff && (
             <div style={{ background: '#FFF3E0', padding: '8px 12px', borderRadius: 8, border: '1px solid #FF9800', fontSize: 11, fontWeight: 600, color: '#E65100' }}>
@@ -3250,7 +3250,7 @@ const handleVerifyOtp = useCallback(async () => {
         {/* ABOUT TAB */}
         {activeTab === 'about' && (
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, borderRadius: 16, padding: 24 }}>
-            <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink, marginBottom: 20 }}>About DailyBloom</div>
+            <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink, marginBottom: 20 }}>About DailyBloom — नवोदयः —</div>
             <div style={{ fontSize: 14, color: COLORS.inkSoft, lineHeight: 1.6 }}>
               DailyBloom is a daily morning essentials delivery service tailored specifically for households in Guwahati. We deliver fresh farm dairy, puja flowers directly from local vendors, organic sugarcane and date palm jaggery, organic honey, and fresh daily bakery goods.
             </div>
