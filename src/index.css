@@ -86,3 +86,30 @@ input:-webkit-autofill:active {
     padding-bottom: max(0px, env(safe-area-inset-bottom));
   }
 }
+
+/* Touch-friendly minimum sizes for mobile */
+@media (max-width: 768px) {
+  button, a, input, select, textarea {
+    min-height: 48px; /* WCAG 2.1 AA touch target minimum */
+    min-width: 48px;
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+  
+  /* Prevent zoom on double-tap */
+  button, input, select, textarea {
+    touch-action: manipulation;
+  }
+  
+  /* Better tap targets for small buttons */
+  button {
+    padding: 12px 16px;
+  }
+  
+  .icon-button {
+    min-width: 48px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

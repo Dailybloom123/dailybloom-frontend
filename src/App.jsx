@@ -2494,7 +2494,7 @@ const handleVerifyOtp = useCallback(async () => {
                                     setSubscriptionType(subTypeMap[selectedSubscriptionType] || 'daily');
                                     setShowSubscriptionModal(true);
                                   }}
-                                  style={{ background: '#4CAF50', border: 'none', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 11, cursor: 'pointer', color: 'white' }}
+                                  style={{ background: '#4CAF50', border: 'none', borderRadius: 8, padding: '12px 16px', minHeight: '48px', fontWeight: 700, fontSize: 11, cursor: 'pointer', color: 'white' }}
                                 >
                                   Subscribe {selectedSubscriptionType}
                                 </button>
@@ -2504,7 +2504,7 @@ const handleVerifyOtp = useCallback(async () => {
                                     setSelectedProductForSubscription(product);
                                     setShowSubscriptionModal(true);
                                   }}
-                                  style={{ background: '#4CAF50', border: 'none', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 11, cursor: 'pointer', color: 'white' }}
+                                  style={{ background: '#4CAF50', border: 'none', borderRadius: 8, padding: '12px 16px', minHeight: '48px', fontWeight: 700, fontSize: 11, cursor: 'pointer', color: 'white' }}
                                 >
                                   Subscribe
                                 </button>
@@ -2512,7 +2512,7 @@ const handleVerifyOtp = useCallback(async () => {
                               {(!orderStatus.available) ? (
                                 <button 
                                   disabled
-                                  style={{ background: '#ccc', border: 'none', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 11, cursor: 'not-allowed', color: '#666' }}
+                                  style={{ background: '#ccc', border: 'none', borderRadius: 8, padding: '12px 16px', minHeight: '48px', fontWeight: 700, fontSize: 11, cursor: 'not-allowed', color: '#666' }}
                                   title={orderStatus.message}
                                 >
                                   Unavailable
@@ -2523,7 +2523,7 @@ const handleVerifyOtp = useCallback(async () => {
                                     setCart(prev => ({ ...prev, [product.id]: 1 }));
                                     analytics.trackAddToCart(product);
                                   }} 
-                                  style={{ background: COLORS.marigold, border: 'none', borderRadius: 8, padding: '6px 12px', fontWeight: 700, fontSize: 11, cursor: 'pointer' }}
+                                  style={{ background: COLORS.marigold, border: 'none', borderRadius: 8, padding: '12px 16px', minHeight: '48px', fontWeight: 700, fontSize: 11, cursor: 'pointer' }}
                                 >
                                   {product.preOrder || product.earlyMorningDelivery ? 'Pre-order' : 'Add'}
                                 </button>
@@ -2802,7 +2802,7 @@ const handleVerifyOtp = useCallback(async () => {
               <div style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: COLORS.ink }}>My Daily</div>
               <button
                 onClick={() => setShowVacationModal(true)}
-                style={{ background: '#FFF3E0', border: 'none', borderRadius: 8, padding: '8px 16px', fontWeight: 600, fontSize: 12, cursor: 'pointer', color: COLORS.marigoldDark }}
+                style={{ background: '#FFF3E0', border: 'none', borderRadius: 8, padding: '12px 16px', minHeight: '48px', fontWeight: 600, fontSize: 12, cursor: 'pointer', color: COLORS.marigoldDark }}
               >
                 + Plan Vacation
               </button>
